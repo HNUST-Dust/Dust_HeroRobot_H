@@ -45,34 +45,42 @@ public:
     {
         return INS.Roll;
     }
+
     inline float GetPitchAngle()
     {
         return INS.Pitch;
     }
+
     inline float GetYawAngle()
     {
         return INS.Yaw;
     }
+
     inline float GetYawAngleTotalAngle()
     {
         return INS.YawTotalAngle;
     }
+
     inline float GetTemperature()
     {
         return INS.Temperature;
     }
+
     inline float GetRollVelocity()
     {
         return INS.Gyro[X];
     }
+
     inline float GetPitchVelocity()
     {
         return INS.Gyro[Y];
     }
+
     inline float GetYawVelocity()
     {
         return INS.Gyro[Z];
     }
+    
     inline float* GetImuQ()
     {
         return INS.q;

@@ -46,6 +46,7 @@ enum PcAutoAimMode
 };
 
 #pragma pack(1)
+
 /**
  * @brief PcComm自瞄发送结构体
  * 
@@ -102,20 +103,11 @@ struct PCRecvAutoAimData
         float pitch_acc;        // pitch轴角加速度
     } pitch;
     
+    uint8_t flag;
+
     uint16_t crc16;             // 校验位
 };
 
-/**
- * @brief PcComm导航接收结构体
- * 
- */
-struct PCRecvNavigationData
-{
-    uint8_t start_of_frame = 0x6A;
-    PcConv linear_x[4] = {0, 0, 0, 0};
-    PcConv linear_y[4] = {0, 0, 0, 0};
-    uint8_t crc16[2] = {0};
-};
 #pragma pack()
 
 /**
@@ -144,16 +136,8 @@ public:
         {0,0,0},
         {0,0,0},
         0,
+        0,
     };
-    // 接收导航数据
-    PCRecvNavigationData recv_navigation_data = 
-    {
-        0x6A,
-        {0,0,0,0},
-        {0,0,0,0},
-        {0,0},
-    };
-
     void Init();
 
     void Task();
@@ -165,6 +149,7 @@ public:
     void UpdataAutoaimData();
 
 private:
+
     // FreeRTOS 入口，静态函数
     static void TaskEntry(void *param);
 };

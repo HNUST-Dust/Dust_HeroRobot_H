@@ -114,11 +114,11 @@ protected:
 
     float c_nor = -256.0f / 165.0f;
 
-    // pitch线性转换参数（-0.35rad为摇杆最低，0.65rad为摇杆最高）
+    // pitch线性转换参数（-24为摇杆最低，24为摇杆最高）
 
-    float k_pitch = 0.025f;
+    float k_pitch = 1.f / 30.f;
 
-    float c_pitch = -32.1f;
+    float c_pitch = -512.f / 15.f;
 
     // 掉线清理数据函数
 

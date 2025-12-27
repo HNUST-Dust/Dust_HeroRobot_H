@@ -11,6 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "dvc_PC_comm.h"
+#include "ins_task.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -55,15 +56,19 @@ void PcComm::TaskEntry(void *argument)
  */
 void PcComm::UpdataAutoaimData()
 {
-    memcpy(&send_autoaim_data.q, INS.q, 16);
+    float rotation_q[4] = {0};
+
+    EularAngleToQuaternion(INS.Yaw, INS.Pitch, -INS.Roll, rotation_q);
+
+    memcpy(&send_autoaim_data.q, rotation_q, 16);
 
     send_autoaim_data.mode           = 0;
     send_autoaim_data.yaw.ang        = INS.Yaw;
     send_autoaim_data.yaw.vel        = INS.Gyro[Z];
     send_autoaim_data.pitch.ang      = -INS.Roll;
     send_autoaim_data.pitch.vel      = -INS.Gyro[X]; 
-    send_autoaim_data.bullet.speed   = 16;
-    send_autoaim_data.bullet.count   = 20;
+    send_autoaim_data.bullet.speed   = 16.f;
+    send_autoaim_data.bullet.count   = 20.f;
 }
 
 
@@ -74,7 +79,7 @@ void PcComm::UpdataAutoaimData()
 void PcComm::Send_Message()
 {
     uint16_t lenth = sizeof(send_autoaim_data);
-    uint8_t buffer[lenth];  // 明确的43字节
+    uint8_t buffer[lenth];
 
     send_autoaim_data.crc16 = 0;
 
@@ -113,13 +118,5 @@ void PcComm::RxCpltCallback()
         // {
         //     memcpy(&recv_autoaim_data, bsp_usb_rx_buffer, lenth);
         // }
-    }
-    else if(bsp_usb_rx_buffer[0] == recv_navigation_data.start_of_frame)
-    {
-        memcpy(recv_navigation_data.linear_x, &bsp_usb_rx_buffer[1], 4);
-        memcpy(recv_navigation_data.linear_y, &bsp_usb_rx_buffer[5], 4);
-
-        recv_navigation_data.crc16[0] = bsp_usb_rx_buffer[9];
-        recv_navigation_data.crc16[1] = bsp_usb_rx_buffer[10];
     }
 }

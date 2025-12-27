@@ -22,9 +22,9 @@
             (data) = (min);                 \
         }}while(0)
 
-#define MAX_SHOOT_SPEED            -50.f
-#define MAX_PITCH_RADIAN            0.45f
-#define MIN_PITCH_RADIAN           -0.35f
+#define MAX_SHOOT_OMEGA           -30.0f
+#define MAX_PITCH_ANGLE            20.0f
+#define MIN_PITCH_ANGLE           -10.0f
 
 
 /* Private types -------------------------------------------------------------*/
@@ -106,6 +106,7 @@ void Robot::Task()
         /****************************   PCcomm   ****************************/
 
         
+        
 
         
         /****************************   云台   ****************************/
@@ -113,8 +114,13 @@ void Robot::Task()
 
         if(remote_dr16_.output_.switch_r == SWITCH_MID)
         {
-            remote_angle = remote_dr16_.output_.pitch;
-            gimbal_.SetTargetPitchRadian(normalize_angle_pm_pi(remote_angle));
+            remote_angle = normalize_angle_pm_pi(remote_dr16_.output_.pitch);
+
+            INTERVAL_LIMIT(remote_angle, MAX_PITCH_ANGLE, MIN_PITCH_ANGLE);
+
+            gimbal_.SetTargetPitchRadian(remote_angle);
+
+            shoot_.SetTargetShootOmega(0);
         }
         else if(remote_dr16_.output_.switch_r == SWITCH_UP)
         {
@@ -122,19 +128,27 @@ void Robot::Task()
             {
                 case(AUTOAIM_MODE_IDIE):
                 {
-                    remote_angle = remote_dr16_.output_.pitch;
-                    gimbal_.SetTargetPitchRadian(normalize_angle_pm_pi(remote_angle));
+                    remote_angle = normalize_angle_pm_pi(remote_dr16_.output_.pitch);
+
+                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_ANGLE, MIN_PITCH_ANGLE);
+
+                    gimbal_.SetTargetPitchRadian(remote_angle);
+
+                    shoot_.SetTargetShootOmega(0);
+
                     break;
                 }
                 case(AUTOAIM_MODE_FOLLOW):
                 {
                     float filtered_autoaim =  gimbal_.pitch_autoaim_filter_.Update(pc_comm_.recv_autoaim_data.pitch.pitch_ang);
 
-                    remote_angle -= filtered_autoaim / 300.f;
+                    remote_angle -= filtered_autoaim / 350.f;
 
-                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
+                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_ANGLE, MIN_PITCH_ANGLE);
 
-                    gimbal_.SetTargetPitchRadian(normalize_angle_pm_pi(remote_angle));
+                    gimbal_.SetTargetPitchRadian(remote_angle);
+
+                    shoot_.SetTargetShootOmega(0);
 
                     break;
                 }
@@ -142,48 +156,53 @@ void Robot::Task()
                 {
                     float filtered_autoaim =  gimbal_.pitch_autoaim_filter_.Update(pc_comm_.recv_autoaim_data.pitch.pitch_ang);
 
-                    remote_angle -= filtered_autoaim / 300.f;
+                    remote_angle -= filtered_autoaim / 350.f;
 
-                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
+                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_ANGLE, MIN_PITCH_ANGLE);
 
-                    gimbal_.SetTargetPitchRadian(normalize_angle_pm_pi(remote_angle));
-                    // shoot_.SetTargetShootSpeed(MAX_SHOOT_SPEED);
+                    gimbal_.SetTargetPitchRadian(remote_angle);
+
+                    shoot_.SetTargetShootOmega(0);
+
                     break;
                 }
             }
         }
 
-        gimbal_.SetImuPitchAngle(normalize_angle_pm_pi(imu_.GetPitchAngle()));
-
+        gimbal_.SetImuPitchAngle(normalize_angle_pm_pi(imu_.GetRollAngle()));
 
         /****************************   摩擦轮   ****************************/
 
-        switch (remote_dr16_.output_.switch_l) 
-        {
-            case SWITCH_UP:
-            {
-                shoot_.SetTargetShootOmega(0);
-                break;
-            }
-            case SWITCH_MID:
-            {
-                shoot_.SetTargetShootOmega(0);
-                break;
-            }
-            case SWITCH_DOWN:
-            {
-                shoot_.SetTargetShootOmega(MAX_SHOOT_SPEED);
-                break;
-            }
-            default:
-            {
-                shoot_.SetTargetShootOmega(0);
-                break;
-            }
-        }
+        
+        // switch (remote_dr16_.output_.switch_l) 
+        // {
+        //     case SWITCH_UP:
+        //     {
+        //         shoot_.SetTargetShootOmega(0);
+        //         break;
+        //     }
+        //     case SWITCH_MID:
+        //     {
+        //         shoot_.SetTargetShootOmega(0);
+        //         break;
+        //     }
+        //     case SWITCH_DOWN:
+        //     {
+        //         shoot_.SetTargetShootOmega(MAX_SHOOT_SPEED);
+        //         break;
+        //     }
+        //     default:
+        //     {
+        //         shoot_.SetTargetShootOmega(0);
+        //         break;
+        //     }
+        // }
 
 
         /****************************   调试   ****************************/
+
+
+        // printf("%f\n", remote_angle);
 
 
         osDelay(pdMS_TO_TICKS(1));

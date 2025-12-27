@@ -34,9 +34,9 @@ void Gimbal::Init()
     // pitch轴角度环
     pitch_angle_pid_.Init(
         17.8f,
-        0.5f,
-        0.235f,
-        0.f,
+        3.0f,
+        1.735f,
+        1.f,
         0.f,
         44.0f,
         0.001f,
@@ -47,9 +47,9 @@ void Gimbal::Init()
     );
     // pitch轴角度环
     pitch_omega_pid_.Init(
-        0.9f,
-        0.003f,
-        0.00005f,
+        1.2f,
+        0.03f,
+        0.0005f,
         0.1f,
         0.0f,
         9.9f,
@@ -64,8 +64,8 @@ void Gimbal::Init()
 
     pitch_autoaim_filter_.Init(20.f, 0.001f);
 
-    // 4310电机初始化
-    motor_pitch_.Init(&hcan2, 0x04, 0x03);
+    // 4340电机初始化
+    motor_pitch_.Init(&hcan2, 0x04, 0x03, MOTOR_DM_CONTROL_METHOD_NORMAL_MIT, 12.5f, 10.f, 28.f);
 
     motor_pitch_.CanSendClearError();
     osDelay(pdMS_TO_TICKS(1000));

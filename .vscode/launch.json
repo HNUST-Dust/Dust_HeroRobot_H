@@ -3,7 +3,7 @@
     "configurations": [
         {
             "cwd": "${workspaceRoot}",
-            "executable": "${workspaceFolder}/build/Dust_SentinelRobotChassis_H.elf",
+            "executable": "${workspaceFolder}/build/Dust_HeroRobot_H.elf",
             "name": "Debug with OpenOCD",
             "request": "launch",
             "type": "cortex-debug",

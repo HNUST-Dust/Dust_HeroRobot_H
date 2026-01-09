@@ -116,11 +116,11 @@ void Gimbal::SelfResolution()
     now_pitch_radian_ = normalize_angle_pm_pi(now_pitch_angle_);                     // 弧度
         
     // 计算pitch轴偏差
-    pitch_angle_diff_ = imu_pitch_angle_ - target_pitch_radian_;
+    pitch_radian_diff_ = imu_pitch_radian_ - target_pitch_radian_;
 
     // 角度环
     pitch_angle_pid_.SetTarget(0);
-    pitch_angle_pid_.SetNow(pitch_angle_diff_);
+    pitch_angle_pid_.SetNow(pitch_radian_diff_);
     pitch_angle_pid_.CalculatePeriodElapsedCallback();
 
     // 速度环

@@ -11,9 +11,10 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "dvc_PC_comm.h"
-#include "ins_task.h"
 
 /* Private macros ------------------------------------------------------------*/
+
+#define MAX_PC_DISALIVE_PERIOD  200     // 200ms
 
 /* Private types -------------------------------------------------------------*/
 
@@ -27,7 +28,6 @@
  */
 void PcComm::Init()
 {
-    dwt_init(168);
 
     static const osThreadAttr_t KPcCommTaskAttr = 
     {
@@ -90,6 +90,47 @@ void PcComm::Send_Message()
 }
 
 /**
+ * @brief PcComm清理数据函数
+ * 
+ */
+void PcComm::ClearData()
+{
+    recv_autoaim_data.mode = 0;
+
+    recv_autoaim_data.yaw.yaw_ang = 0;
+    recv_autoaim_data.yaw.yaw_vel = 0;
+    recv_autoaim_data.yaw.yaw_acc = 0;
+
+    recv_autoaim_data.pitch.pitch_ang = 0;
+    recv_autoaim_data.pitch.pitch_acc = 0;
+    recv_autoaim_data.pitch.pitch_vel = 0;
+}
+
+/**
+ * @brief PcComm存活周期检测回调函数
+ * 
+ */
+void PcComm::AlivePeriodElapsedCallback()
+{
+    if(++alive_count_ >= MAX_PC_DISALIVE_PERIOD)
+    {
+        if(pre_flag_ == flag_)
+        {
+            pc_alive_state = PC_ALIVE_STATE_DISABLE;
+            ClearData();
+        }
+        else
+        {
+            pc_alive_state = PC_ALIVE_STATE_ENABLE;
+        }
+
+        pre_flag_ = flag_;
+
+        alive_count_ = 0;
+    }
+}
+
+/**
  * @brief PcComm任务函数
  * 
  */
@@ -97,6 +138,7 @@ void PcComm::Task()
 {
     for(;;)
     {
+        AlivePeriodElapsedCallback();
         UpdataAutoaimData();
         Send_Message();
         osDelay(pdMS_TO_TICKS(1));
@@ -108,6 +150,18 @@ void PcComm::Task()
  * 
  */
 void PcComm::RxCpltCallback()
+{
+    // 滑动窗口
+    flag_ += 1;
+
+    DataProcess();
+}
+
+/**
+ * @brief PcComm数据处理函数
+ * 
+ */
+void PcComm::DataProcess()
 {
     if(bsp_usb_rx_buffer[0] == 'S' && bsp_usb_rx_buffer[1] == 'P')
     {

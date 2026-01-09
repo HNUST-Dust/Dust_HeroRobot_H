@@ -45,6 +45,16 @@ enum PcAutoAimMode
     AUTOAIM_MODE_FIRE,
 };
 
+/**
+ * @brief PcComm存活状态枚举
+ * 
+ */
+enum PcAliveState
+{
+    PC_ALIVE_STATE_ENABLE = 0,
+    PC_ALIVE_STATE_DISABLE,
+};
+
 #pragma pack(1)
 
 /**
@@ -87,6 +97,7 @@ struct PCSendAutoAimData
 struct PCRecvAutoAimData
 {
     uint8_t head[2] = {'S','P'};
+    
     uint8_t mode = 0;           // 0-空闲 1-自瞄不开火 2-自瞄开火
 
     struct
@@ -102,8 +113,6 @@ struct PCRecvAutoAimData
         float pitch_vel;        // pitch轴角速度
         float pitch_acc;        // pitch轴角加速度
     } pitch;
-    
-    uint8_t flag;
 
     uint16_t crc16;             // 校验位
 };
@@ -136,7 +145,6 @@ public:
         {0,0,0},
         {0,0,0},
         0,
-        0,
     };
     void Init();
 
@@ -149,6 +157,19 @@ public:
     void UpdataAutoaimData();
 
 private:
+    uint32_t flag_ = 0;
+
+    uint32_t pre_flag_ = 0;
+
+    uint32_t alive_count_ = 0;
+
+    PcAliveState pc_alive_state = PC_ALIVE_STATE_DISABLE;
+
+    void ClearData();
+
+    void DataProcess();
+
+    void AlivePeriodElapsedCallback();
 
     // FreeRTOS 入口，静态函数
     static void TaskEntry(void *param);

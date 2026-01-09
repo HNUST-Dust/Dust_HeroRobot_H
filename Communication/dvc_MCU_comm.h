@@ -34,6 +34,16 @@ union McuConv
 };
 
 /**
+ * @brief Mcu存活状态枚举
+ * 
+ */
+enum McuAliveState
+{
+    MCU_ALIVE_STATE_ENABLE = 0,
+    MCU_ALIVE_STATE_DISABLE,
+};
+
+/**
  * @brief Mcu底盘数据结构体
  * 
  */
@@ -64,11 +74,9 @@ struct McuCommData
  */
 struct McuSendAutoaimData
 {
-    uint8_t         start_of_yaw_frame = 0xAC;
-
+    uint8_t         start_of_frame = 0xAC;
     uint8_t         mode;
-
-    McuConv         autoaim_yaw_angle;            // 自瞄yaw轴角度
+    McuConv         autoaim_yaw_angle;          // 自瞄yaw轴角度
 };
 
 /**
@@ -78,7 +86,6 @@ struct McuSendAutoaimData
 struct McuRecvAutoaimData
 {
     uint8_t         start_of_yaw_frame = 0xAC;
-
     McuConv         autoaim_yaw_angle;
 };
 
@@ -123,7 +130,7 @@ public:
 
     void Task();
 
-    void DisConnectData();
+    void ClearData();
 
     void CanSendChassis();
 
@@ -135,6 +142,8 @@ public:
 
     void CanRxCpltCallback(uint8_t *rx_data);
 
+    inline McuAliveState GetMcuAliveState();
+
 protected:
 
     CanManageObject *can_manage_object_;
@@ -145,7 +154,17 @@ protected:
 
     uint8_t tx_data_[8];
 
-    void DataProcess();
+    uint32_t flag_ = 0;
+
+    uint32_t pre_flag_ = 0;
+
+    uint32_t alive_count_ = 0;
+
+    McuAliveState mcu_alive_state_ = MCU_ALIVE_STATE_DISABLE;
+
+    void DataProcess(uint8_t* rx_data);
+
+    void AlivePeriodElapsedCallback();
     
     // FreeRTOS 入口，静态函数
     static void TaskEntry(void *param);
@@ -154,5 +173,10 @@ protected:
 /* Exported variables --------------------------------------------------------*/
 
 /* Exported function declarations --------------------------------------------*/
+
+inline McuAliveState McuComm::GetMcuAliveState()
+{
+    return (mcu_alive_state_);
+}
 
 #endif

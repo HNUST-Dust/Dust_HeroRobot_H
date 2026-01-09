@@ -14,6 +14,8 @@
 
 /* Private macros ------------------------------------------------------------*/
 
+#define MAX_MCU_DISALIVE_PERIOD   10
+
 /* Private types -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
@@ -140,7 +142,7 @@ void McuComm::CanSendAutoaimData()
  * @brief McuComm掉线数据函数
  * 
  */
-void McuComm::DisConnectData()
+void McuComm::ClearData()
 {
      send_chassis_data_.chassis_speed_x = 1024;
      send_chassis_data_.chassis_speed_y = 1024;
@@ -149,6 +151,30 @@ void McuComm::DisConnectData()
      send_comm_data_.switch_r = SWITCH_MID;
      send_comm_data_.switch_l = SWITCH_MID;
      send_comm_data_.supercap = 0;
+}
+
+/**
+ * @brief McuComm存活周期检测回调函数
+ * 
+ */
+void McuComm::AlivePeriodElapsedCallback()
+{
+     if(++alive_count_ >= MAX_MCU_DISALIVE_PERIOD)
+     {
+          if(pre_flag_ == flag_)
+          {
+               mcu_alive_state_ = MCU_ALIVE_STATE_DISABLE;
+               ClearData();
+          }
+          else
+          {
+               mcu_alive_state_ = MCU_ALIVE_STATE_ENABLE;
+          }
+
+          pre_flag_ = flag_;
+
+          alive_count_ = 0;
+     }
 }
 
 /**
@@ -172,8 +198,19 @@ void McuComm::Task()
  */
 void McuComm::CanRxCpltCallback(uint8_t* rx_data)
 {
-     // 判断在线
+     // 滑动窗口，防止掉线
+     flag_ += 1;
 
+     DataProcess(rx_data);
+}
+
+/**
+ * @brief McuComm数据处理函数
+ * 
+ * @param rx_data 
+ */
+void McuComm::DataProcess(uint8_t* rx_data)
+{
      // 处理数据 , 解包
      switch (rx_data[0])
      {

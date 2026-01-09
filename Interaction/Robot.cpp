@@ -39,8 +39,13 @@
  */
 void Robot::Init()
 {
+    dwt_init(168);
+
     // 遥控初始化
     remote_dr16_.Init(&huart3, uart3_callback_function, UART_BUFFER_LENGTH);
+
+    // 陀螺仪初始化
+    imu_.Init();
 
     // 上下板通讯组件初始化
     mcu_comm_.Init(&hcan2, 0x00, 0x01);
@@ -50,9 +55,6 @@ void Robot::Init()
 
     // 等待云台yaw角回正
     osDelay(pdMS_TO_TICKS(5000));
-
-    // 陀螺仪初始化
-    imu_.Init();
 
     // 云台初始化
     gimbal_.Init();
@@ -95,7 +97,7 @@ void Robot::Task()
         // 若掉线发送空白数据
         if(remote_dr16_.remote_dji_alive_status == REMOTE_DJI_STATUS_DISABLE)
         {
-            mcu_comm_.DisConnectData();
+            mcu_comm_.ClearData();
         }
 
         mcu_comm_.UpdataAutoaimData(&pc_comm_.recv_autoaim_data);
@@ -134,7 +136,7 @@ void Robot::Task()
 
                     gimbal_.SetTargetPitchRadian(remote_angle);
 
-                    shoot_.SetTargetShootOmega(0);
+                    shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
 
                     break;
                 }
@@ -148,7 +150,7 @@ void Robot::Task()
 
                     gimbal_.SetTargetPitchRadian(remote_angle);
 
-                    shoot_.SetTargetShootOmega(0);
+                    shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
 
                     break;
                 }
@@ -162,47 +164,27 @@ void Robot::Task()
 
                     gimbal_.SetTargetPitchRadian(remote_angle);
 
-                    shoot_.SetTargetShootOmega(0);
+                    shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
 
                     break;
                 }
             }
         }
+        else if(remote_dr16_.output_.switch_r == SWITCH_DOWN)
+        {
+            remote_angle = normalize_angle_pm_pi(remote_dr16_.output_.pitch);
 
-        gimbal_.SetImuPitchAngle(normalize_angle_pm_pi(imu_.GetRollAngle()));
+            INTERVAL_LIMIT(remote_angle, MAX_PITCH_ANGLE, MIN_PITCH_ANGLE);
 
-        /****************************   摩擦轮   ****************************/
+            gimbal_.SetTargetPitchRadian(remote_angle);
 
-        
-        // switch (remote_dr16_.output_.switch_l) 
-        // {
-        //     case SWITCH_UP:
-        //     {
-        //         shoot_.SetTargetShootOmega(0);
-        //         break;
-        //     }
-        //     case SWITCH_MID:
-        //     {
-        //         shoot_.SetTargetShootOmega(0);
-        //         break;
-        //     }
-        //     case SWITCH_DOWN:
-        //     {
-        //         shoot_.SetTargetShootOmega(MAX_SHOOT_SPEED);
-        //         break;
-        //     }
-        //     default:
-        //     {
-        //         shoot_.SetTargetShootOmega(0);
-        //         break;
-        //     }
-        // }
+            shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
+        }
+
+        gimbal_.SetImuPitchRadian(normalize_angle_pm_pi(imu_.GetRollAngle()));
 
 
         /****************************   调试   ****************************/
-
-
-        // printf("%f\n", remote_angle);
 
 
         osDelay(pdMS_TO_TICKS(1));

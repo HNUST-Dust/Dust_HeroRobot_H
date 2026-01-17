@@ -14,15 +14,15 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "bsp_dwt.h"
-#include "imu.hpp"
 
-#include "dvc_remote_dji.h"
+#include "dvc_remote_dr16.h"
+#include "dvc_remote_vt02.h"
 #include "dvc_MCU_comm.h"
 #include "dvc_PC_comm.h"
-#include "VT03.h"
 
 #include "app_gimbal.h"
 #include "app_shoot.h"
+#include "imu.hpp"
 
 #include "stdio.h"
 
@@ -33,10 +33,10 @@
 class Robot
 {
 public:
-    // 遥控
+    // 遥控dr16
     RemoteDjiDR16 remote_dr16_;
-    
-    VT03 remote_vt03_;
+    // 遥控vt02
+    RemoteDjiVT02 remote_vt02_;
     // 上下板通讯
     McuComm mcu_comm_;
     // pitch角云台
@@ -51,6 +51,7 @@ public:
     void Init();
     
     void Task();
+
 protected:
 
     float remote_angle = 0.0f;

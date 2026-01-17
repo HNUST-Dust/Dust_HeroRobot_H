@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2025
  * 
  */
-#ifndef __DVC_REMOTE_DJI_H__
-#define __DVC_REMOTE_DJI_H__
+#ifndef __DVC_REMOTE_DJI_DR16_H__
+#define __DVC_REMOTE_DJI_DR16_H__
 
 /* Includes ------------------------------------------------------------------*/
 
@@ -21,17 +21,21 @@
 
 /* Exported types ------------------------------------------------------------*/
 
-enum RemoteDjiAliveStatus
+/**
+ * @brief 
+ * 
+ */
+enum RemoteDR16AliveStatus
 {
-    REMOTE_DJI_STATUS_DISABLE = 0,
-    REMOTE_DJI_STATUS_ENABLE  = 1,
+    REMOTE_DR16_ALIVE_STATUS_DISABLE = 0,
+    REMOTE_DR16_ALIVE_STATUS_ENABLE  = 1,
 };
 
 /**
  * @brief 遥控按键状态
  * 
  */
-enum RemoteDjiSwitchStatus
+enum RemoteDR16SwitchStatus
 {
     SWITCH_UP    = (uint8_t)1,
     SWITCH_MID   = (uint8_t)3,
@@ -39,25 +43,65 @@ enum RemoteDjiSwitchStatus
 };
 
 /**
- * @brief 遥控原始数据
+ * @brief DjiDR16原始数据
  * 
  */
-struct RemoteDjiData
+struct RemoteDR16Data
 {
-    uint16_t ch0, ch1, ch2, ch3;
-    uint8_t s1, s2;
+    struct 
+    {
+        uint16_t ch0, ch1, ch2, ch3;
+        uint8_t s1, s2;
+    } rc;
+
+    struct
+    {
+        int16_t x, y, z;
+        uint8_t pl, pr;
+    } mouse;
+
+    struct 
+    {
+        uint16_t key;
+    } keyboard;
 };
 
 /**
- * @brief 遥控输出
+ * @brief DjiDR16输出
  * 
  */
-struct RemoteDjiOutput
+struct RemoteDR16Output
 {
-    uint8_t switch_l, switch_r;
-    float chassis_x, chassis_y;      // x, y, r 采用右手系
-    float rotation;
-    float pitch;       
+    struct 
+    {
+        uint8_t switch_l, switch_r;
+        float chassis_x, chassis_y;      // x, y, r 采用右手系
+        float rotation;
+        float pitch;
+    } remote;
+
+    struct
+    {
+        float mouse_x, mouse_y, mouse_z;
+        uint8_t press_l, press_r;
+    } mouse;
+
+    union
+    {
+        uint16_t all;
+        struct
+        {
+            uint16_t w : 1, 
+                     s : 1,
+                     a : 1,
+                     d : 1,
+                     q : 1, 
+                     e : 1;
+            uint16_t shift : 1, 
+                     ctrl : 1;
+            uint16_t reserved : 8;
+        } key;
+    } keyboard;
 };
 
 /**
@@ -68,10 +112,10 @@ class RemoteDjiDR16
 {
 public:
     // 遥控器输出数据
-    RemoteDjiOutput output_;
+    RemoteDR16Output output_;
 
     // 遥控器状态
-    RemoteDjiAliveStatus remote_dji_alive_status = REMOTE_DJI_STATUS_DISABLE;
+    RemoteDR16AliveStatus remote_dr16_alive_status = REMOTE_DR16_ALIVE_STATUS_DISABLE;
 
     void Init(UART_HandleTypeDef *huart, Uart_Callback callback_function, uint16_t rx_buffer_length);
 
@@ -95,12 +139,12 @@ public:
 
     static void TaskEntry(void *param);  // FreeRTOS 入口，静态函数
 
-protected:
+private:
     // uart管理模块
     UartManageObject* uart_manage_object_;
 
     // 原始数据
-    RemoteDjiData data_;
+    RemoteDR16Data raw_data_;
 
     // 当前时刻flag
     uint32_t flag_ = 0;
@@ -126,46 +170,12 @@ protected:
 
     // 内部数据处理函数
 
-    void DataProcess(uint8_t* buffer);
+    void DataProcess(uint8_t* rx_data);
 };
 
 /* Exported variables --------------------------------------------------------*/
 
 /* Exported function declarations --------------------------------------------*/
 
-/**
- * @brief 获取左摇杆X值
- * 
- * @return float 
- */
-inline float RemoteDjiDR16::GetLeftX()
-{
-    return output_.rotation;
-}
-
-inline float RemoteDjiDR16::GetLeftY()
-{
-    return output_.pitch;
-}
-
-inline float RemoteDjiDR16::GetRightX()
-{
-    return output_.chassis_x;
-}
-
-inline float RemoteDjiDR16::GetRightY()
-{
-    return output_.chassis_y;
-}
-
-inline uint8_t RemoteDjiDR16::GetSwitchL()
-{
-    return output_.switch_l;
-}
-
-inline uint8_t RemoteDjiDR16::GetSwitchR()
-{
-    return output_.switch_r;
-}
 
 #endif

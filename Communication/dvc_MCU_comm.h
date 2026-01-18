@@ -16,6 +16,7 @@
 #include "bsp_can.h"
 #include "dvc_PC_comm.h"
 #include "dvc_remote_dr16.h"
+#include "dvc_remote_vt02.h"
 #include "FreeRTOS.h"
 #include "cmsis_os2.h"
 
@@ -53,21 +54,6 @@ struct McuChassisData
     uint16_t         chassis_speed_x;           // 平移方向：左、右
     uint16_t         chassis_speed_y;           // 平移方向：前、后
     uint16_t         rotation;                  // 旋转方向：不转、顺时针转、逆时针转
-    union
-    {
-        uint8_t all;
-        struct
-        {
-            uint8_t w : 1;
-            uint8_t s : 1;
-            uint8_t a : 1;
-            uint8_t d : 1;
-            uint8_t shift : 1;
-            uint8_t ctrl : 1;
-            uint8_t q : 1;
-            uint8_t e : 1;
-        } keycode;
-    } keyboard_l;                               // 键盘：低
 };
 
 /**
@@ -78,43 +64,9 @@ struct McuCommData
 {
     uint8_t         start_of_frame = 0xAB;
 
-    union 
-    {
-        uint8_t all;
-        struct
-        {
-            uint8_t switch_l : 2;
-            uint8_t switch_r : 2;
-            uint8_t reserved : 4;
-        } switchcode;
-    } switch_lr;
-
-    union 
-    {
-        uint8_t all;
-        struct 
-        {
-            uint8_t mouse_l : 2;
-            uint8_t mouse_r : 2;
-            uint8_t reserved : 4;
-        } mousecode;
-    } mouse_lr;
+    MouseLR         mouse_lr;
     
-    union
-    {
-        uint8_t all;
-        struct
-        {
-            uint8_t r : 1;
-            uint8_t f : 1;
-            uint8_t g : 1;
-            uint8_t z : 1;
-            uint8_t x : 1;
-            uint8_t c : 1;
-            uint8_t v : 1;
-            uint8_t b : 1;
-        } keycode;
-    } keyboard_h;                               // 键盘：高
+    Keyboard        keyboard;
 
     McuConv         imu_yaw;                    // yaw轴角度
 };
@@ -154,13 +106,11 @@ public:
         1024,
         1024,
         1024,
-        0,
     };
     
     McuCommData send_comm_data_ = 
     {
         0xAB,
-        15,
         0,
         0,
         {0,0,0,0},

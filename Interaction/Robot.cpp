@@ -11,8 +11,6 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "Robot.h"
-#include "dvc_remote_dr16.h"
-#include "dvc_remote_vt02.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -25,8 +23,8 @@
         }}while(0)
 
 #define MAX_SHOOT_OMEGA           -30.0f
-#define MAX_PITCH_ANGLE            20.0f
-#define MIN_PITCH_ANGLE           -10.0f
+#define MAX_PITCH_RADIAN          0.349f
+#define MIN_PITCH_RADIAN          -0.1745f
 
 
 /* Private types -------------------------------------------------------------*/
@@ -45,9 +43,6 @@ void Robot::Init()
 
     // vt02遥控初始化
     remote_vt02_.Init(&huart1, uart1_callback_function, UART_BUFFER_LENGTH);
-
-    // dr16遥控初始化
-    remote_dr16_.Init(&huart3, uart3_callback_function, UART_BUFFER_LENGTH);
 
     // 陀螺仪初始化
     imu_.Init();
@@ -99,12 +94,6 @@ void Robot::Task()
         /****************************   MCUcomm   ****************************/
 
 
-        // // 若掉线发送空白数据
-        // if(remote_dr16_.remote_dr16_alive_status == REMOTE_DR16_ALIVE_STATUS_DISABLE)
-        // {
-        //     mcu_comm_.ClearData();
-        // }
-
         mcu_comm_.UpdataAutoaimData(&pc_comm_.recv_autoaim_data);
 
         mcu_comm_.CanSendAutoaimData();
@@ -119,25 +108,25 @@ void Robot::Task()
         /****************************   云台   ****************************/
 
 
-        if(remote_dr16_.output_.remote.switch_r == SWITCH_MID || remote_vt02_.output_.mouse_pr == REMOTE_VT02_KEY_STATUS_FREE)
+        if(remote_vt02_.output_.mouse_pr == REMOTE_VT02_KEY_STATUS_FREE)
         {
-            remote_angle = normalize_angle_pm_pi(remote_dr16_.output_.remote.pitch);
+            remote_angle += (remote_vt02_.output_.mouse_y * PI) * 0.1;
 
-            INTERVAL_LIMIT(remote_angle, MAX_PITCH_ANGLE, MIN_PITCH_ANGLE);
+            INTERVAL_LIMIT(remote_angle, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
 
             gimbal_.SetTargetPitchRadian(remote_angle);
 
             shoot_.SetTargetShootOmega(0);
         }
-        else if(remote_dr16_.output_.remote.switch_r == SWITCH_UP || remote_vt02_.output_.mouse_pr ==  REMOTE_VT02_KEY_STATUS_PRESS)
+        else if(remote_vt02_.output_.mouse_pr == REMOTE_VT02_KEY_STATUS_PRESS)
         {
             switch (pc_comm_.recv_autoaim_data.mode)
             {
                 case(AUTOAIM_MODE_IDIE):
                 {
-                    remote_angle = normalize_angle_pm_pi(remote_dr16_.output_.remote.pitch);
+                    remote_angle += (remote_vt02_.output_.mouse_y * PI) * 0.1;
 
-                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_ANGLE, MIN_PITCH_ANGLE);
+                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
 
                     gimbal_.SetTargetPitchRadian(remote_angle);
 
@@ -151,7 +140,7 @@ void Robot::Task()
 
                     remote_angle -= filtered_autoaim / 350.f;
 
-                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_ANGLE, MIN_PITCH_ANGLE);
+                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
 
                     gimbal_.SetTargetPitchRadian(remote_angle);
 
@@ -165,7 +154,7 @@ void Robot::Task()
 
                     remote_angle -= filtered_autoaim / 350.f;
 
-                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_ANGLE, MIN_PITCH_ANGLE);
+                    INTERVAL_LIMIT(remote_angle, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
 
                     gimbal_.SetTargetPitchRadian(remote_angle);
 
@@ -180,9 +169,6 @@ void Robot::Task()
 
 
         /****************************   调试   ****************************/
-
-
-        printf("%d,%d\n", remote_dr16_.output_.remote.switch_r, remote_dr16_.output_.remote.switch_l);
 
 
         osDelay(pdMS_TO_TICKS(1));

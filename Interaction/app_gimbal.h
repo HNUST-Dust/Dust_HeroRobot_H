@@ -268,9 +268,9 @@ inline void Gimbal::SetTargetPitchTorque(float target_pitch_torque)
 }
 
 /**
- * @brief 设定pitch轴力矩
+ * @brief 设定pitch轴弧度
  *
- * @param target_pitch_torque pitch轴力矩
+ * @param target_pitch_torque pitch轴弧度
  */
 inline void Gimbal::SetTargetPitchRadian(float target_pitch_radian)
 {

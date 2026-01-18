@@ -33,8 +33,6 @@
 class Robot
 {
 public:
-    // 遥控dr16
-    RemoteDjiDR16 remote_dr16_;
     // 遥控vt02
     RemoteDjiVT02 remote_vt02_;
     // 上下板通讯

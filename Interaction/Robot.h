@@ -52,7 +52,7 @@ public:
 
 protected:
 
-    float remote_angle = 0.0f;
+    float remote_radian = 0.0f;
 
     // 机器人等级
     int32_t robot_level_ = 1;

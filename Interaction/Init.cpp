@@ -122,8 +122,8 @@ void uart1_callback_function(uint8_t* buffer, uint16_t length)
     robot_.mcu_comm_.send_comm_data_.keyboard.all = robot_.remote_vt02_.output_.keyboard.all;
 
     // 鼠标按键
-    robot_.mcu_comm_.send_comm_data_.mouse_lr.mousecode.mouse_l = robot_.remote_vt02_.output_.mouse_pl;
-    robot_.mcu_comm_.send_comm_data_.mouse_lr.mousecode.mouse_r = robot_.remote_vt02_.output_.mouse_pr;
+    robot_.mcu_comm_.send_comm_data_.mouse_lr.mousecode.mouse_l = robot_.remote_vt02_.output_.mouse_l;
+    robot_.mcu_comm_.send_comm_data_.mouse_lr.mousecode.mouse_r = robot_.remote_vt02_.output_.mouse_r;
 }
 
 /**

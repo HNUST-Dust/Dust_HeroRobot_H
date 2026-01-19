@@ -22,6 +22,10 @@
 
 /* Exported types ------------------------------------------------------------*/
 
+/**
+ * @brief VT02鼠标左右键联合体
+ * 
+ */
 union MouseLR
 {
     uint8_t all;
@@ -33,6 +37,10 @@ union MouseLR
     } mousecode;
 };
 
+/**
+ * @brief VT02键盘联合体
+ * 
+ */
 union Keyboard
 {
     uint16_t all;
@@ -57,10 +65,8 @@ union Keyboard
     } keycode;
 };
 
-
-
 /**
- * @brief 遥控按键状态
+ * @brief VT02按键状态枚举
  * 
  */
 enum RemoteVT02KeyStatus
@@ -70,7 +76,7 @@ enum RemoteVT02KeyStatus
 };
 
 /**
- * @brief 
+ * @brief VT02在线状态枚举
  * 
  */
 enum RemoteVT02AliveStatus
@@ -79,38 +85,53 @@ enum RemoteVT02AliveStatus
     REMOTE_VT02_ALIVE_STATUS_ENABLE  = 1,
 };
 
-
-struct RmoteVT02Data
+/**
+ * @brief VT02原始数据结构体
+ * 
+ */
+struct RmoteVT02RawData
 {
+    uint8_t start_of_frame = 0xA5;
+    uint16_t data_length;
+    uint8_t seq;
+    uint8_t crc8;
+    uint16_t cmd_id;
+
     int32_t mouse_x;
     int32_t mouse_y;
     int32_t mouse_z;
 
-    int8_t mouse_pl;
-    int8_t mouse_pr;
+    int8_t mouse_l;
+    int8_t mouse_r;
 
     Keyboard keyboard;
 };
 
-
-struct RemoteVT02Output
+/**
+ * @brief VT02输出数据结构体
+ * 
+ */
+struct RemoteVT02OutputData
 {
     float mouse_x;
     float mouse_y;
     float mouse_z;
 
-    int8_t mouse_pl;
-    int8_t mouse_pr;
+    int8_t mouse_l;
+    int8_t mouse_r;
 
     Keyboard keyboard;
 };
 
-
+/**
+ * @brief VT02类
+ * 
+ */
 class RemoteDjiVT02
 {
 public:
     // 遥控器输出数据
-    RemoteVT02Output output_;
+    RemoteVT02OutputData output_;
 
     // 遥控器状态
     RemoteVT02AliveStatus remote_vt02_alive_status = REMOTE_VT02_ALIVE_STATUS_DISABLE;
@@ -130,7 +151,7 @@ private:
     UartManageObject* uart_manage_object_;
 
     // 遥控原始数据
-    RmoteVT02Data raw_data_;
+    RmoteVT02RawData raw_data_;
 
     // 当前时刻flag
     uint32_t flag_ = 0;
@@ -145,7 +166,9 @@ private:
     void DataProcess(uint8_t* buffer);
 };
 
+
 /* Exported variables --------------------------------------------------------*/
+
 
 /* Exported function declarations --------------------------------------------*/
 

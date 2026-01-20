@@ -11,6 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "dvc_MCU_comm.h"
+#include "dvc_remote_dr16.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -78,7 +79,7 @@ void McuComm::UpdataAutoaimData(PCRecvAutoAimData* pc_recv_autoaim_data)
  * @brief McuComm发送底盘数据函数
  * 
  */
-void McuComm::CanSendChassis()
+void McuComm::CanSendChassisData()
 {
      static uint8_t can_tx_frame[8];
      // 第一帧发送底盘数据
@@ -93,7 +94,7 @@ void McuComm::CanSendChassis()
      can_tx_frame[5] = send_chassis_data_.rotation >> 8;
      can_tx_frame[6] = send_chassis_data_.rotation;
 
-     can_tx_frame[7] = 0x00;
+     can_tx_frame[7] = send_chassis_data_.switch_lr.all;
 
      can_send_data(can_manage_object_->can_handler, can_tx_id_, can_tx_frame, 8);
 }
@@ -102,16 +103,16 @@ void McuComm::CanSendChassis()
  * @brief McuComm发送命令数据函数
  * 
  */
-void McuComm::CanSendCommand()
+void McuComm::CanSendCommandData()
 {
      static uint8_t can_tx_frame[8];
      McuConv yaw_conv;
      yaw_conv.f = INS.Yaw;
 
      can_tx_frame[0] = 0xAB;
-     can_tx_frame[1] = send_comm_data_.mouse_lr.all;
-     can_tx_frame[2] = send_comm_data_.keyboard.all >> 8;
-     can_tx_frame[3] = send_comm_data_.keyboard.all;
+     can_tx_frame[1] = send_command_data_.mouse_lr.all;
+     can_tx_frame[2] = send_command_data_.keyboard.all >> 8;
+     can_tx_frame[3] = send_command_data_.keyboard.all;
 
      memcpy(&can_tx_frame[4], yaw_conv.b, 4);
 
@@ -144,12 +145,13 @@ void McuComm::CanSendAutoaimData()
  */
 void McuComm::ClearData()
 {
-     send_chassis_data_.chassis_speed_x = 1024;
-     send_chassis_data_.chassis_speed_y = 1024;
-     send_chassis_data_.rotation = 1024;
+     send_chassis_data_.chassis_speed_x = MID_REMOTE_DR16_CHANNLE;
+     send_chassis_data_.chassis_speed_y = MID_REMOTE_DR16_CHANNLE;
+     send_chassis_data_.rotation = MID_REMOTE_DR16_CHANNLE;
+     send_chassis_data_.switch_lr.all = MID_REMOTE_DR16_SWITCH_LR;
 
-     send_comm_data_.mouse_lr.all = 0;
-     send_comm_data_.keyboard.all = 0;
+     send_command_data_.mouse_lr.all = 0;
+     send_command_data_.keyboard.all = 0;
 }
 
 /**
@@ -184,8 +186,8 @@ void McuComm::Task()
 {
      for(;;)
      {    
-          CanSendChassis();
-          CanSendCommand();
+          CanSendChassisData();
+          CanSendCommandData();
           osDelay(pdMS_TO_TICKS(1));
      }
 }

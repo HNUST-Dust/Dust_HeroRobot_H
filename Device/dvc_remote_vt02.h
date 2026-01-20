@@ -26,14 +26,14 @@
  * @brief VT02鼠标左右键联合体
  * 
  */
-union MouseLR
+union RemoteVT02MouseLR
 {
     uint8_t all;
     struct 
     {
-        uint8_t mouse_l : 2;
-        uint8_t mouse_r : 2;
-        uint8_t reserved : 4;
+        uint8_t mouse_l : 1;
+        uint8_t mouse_r : 1;
+        uint8_t reserved : 6;
     } mousecode;
 };
 
@@ -41,7 +41,7 @@ union MouseLR
  * @brief VT02键盘联合体
  * 
  */
-union Keyboard
+union RemoteVT02Keyboard
 {
     uint16_t all;
     struct
@@ -101,10 +101,10 @@ struct RmoteVT02RawData
     int32_t mouse_y;
     int32_t mouse_z;
 
-    int8_t mouse_l;
-    int8_t mouse_r;
+    uint8_t mouse_l;
+    uint8_t mouse_r;
 
-    Keyboard keyboard;
+    RemoteVT02Keyboard keyboard;
 };
 
 /**
@@ -117,10 +117,9 @@ struct RemoteVT02OutputData
     float mouse_y;
     float mouse_z;
 
-    int8_t mouse_l;
-    int8_t mouse_r;
+    RemoteVT02MouseLR mouse_lr;
 
-    Keyboard keyboard;
+    RemoteVT02Keyboard keyboard;
 };
 
 /**
@@ -159,7 +158,7 @@ private:
     // 前一时刻flag
     uint32_t pre_flag_ = 0;
 
-    void Process_Keyboard_Toggle(Keyboard current_raw);
+    void Process_Keyboard_Toggle(RemoteVT02Keyboard current_raw);
 
     void ClearData();
 

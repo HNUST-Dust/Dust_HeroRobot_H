@@ -19,6 +19,12 @@
 
 /* Exported macros -----------------------------------------------------------*/
 
+#define MAX_REMOTE_DR16_CHANNLE      1684
+#define MID_REMOTE_DR16_CHANNLE      1024
+#define MIN_REMOTE_DR16_CHANNLE      364
+
+#define MID_REMOTE_DR16_SWITCH_LR    15
+
 /* Exported types ------------------------------------------------------------*/
 
 /**
@@ -57,7 +63,7 @@ struct RemoteDR16RawData
     struct
     {
         int16_t x, y, z;
-        uint8_t pl, pr;
+        uint8_t l, r;
     } mouse;
 
     struct 
@@ -74,16 +80,14 @@ struct RemoteDR16OutputData
 {
     struct 
     {
+        float chassis_x, chassis_y, rotation, pitch;
         uint8_t switch_l, switch_r;
-        float chassis_x, chassis_y;      // x, y, r 采用右手系
-        float rotation;
-        float pitch;
     } remote;
 
     struct
     {
         float mouse_x, mouse_y, mouse_z;
-        uint8_t press_l, press_r;
+        uint8_t mouse_l, mouse_r;
     } mouse;
 
     union
@@ -91,14 +95,14 @@ struct RemoteDR16OutputData
         uint16_t all;
         struct
         {
-            uint16_t w : 1, 
-                     s : 1,
-                     a : 1,
-                     d : 1,
-                     q : 1, 
-                     e : 1;
-            uint16_t shift : 1, 
-                     ctrl : 1;
+            uint16_t w : 1; 
+            uint16_t s : 1;
+            uint16_t a : 1;
+            uint16_t d : 1;
+            uint16_t q : 1; 
+            uint16_t e : 1;
+            uint16_t shift : 1;
+            uint16_t ctrl : 1;
             uint16_t reserved : 8;
         } keycode;
     } keyboard;
@@ -120,18 +124,6 @@ public:
     void Init(UART_HandleTypeDef *huart, Uart_Callback callback_function, uint16_t rx_buffer_length);
 
     void Task();
-
-    inline float GetLeftX();
-
-    inline float GetLeftY();
-
-    inline float GetRightX();
-
-    inline float GetRightY();
-
-    inline uint8_t GetSwitchL();
-
-    inline uint8_t GetSwitchR();
 
     void AlivePeriodElapsedCallback();
 

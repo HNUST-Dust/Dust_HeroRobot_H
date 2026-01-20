@@ -46,7 +46,7 @@ void RemoteDjiDR16::Init(UART_HandleTypeDef *huart, Uart_Callback callback_funct
         .stack_size = 256,
         .priority = (osPriority_t) osPriorityNormal
     };
-    osThreadNew(RemoteDjiDR16::TaskEntry, this, &kRemoteDR16TaskAttr);
+    // osThreadNew(RemoteDjiDR16::TaskEntry, this, &kRemoteDR16TaskAttr);
 }
 
 /**
@@ -81,8 +81,8 @@ void RemoteDjiDR16::DataProcess(uint8_t* rx_data)
     raw_data_.mouse.y = ((int16_t)rx_data[8]) | ((int16_t)rx_data[9] << 8);
     raw_data_.mouse.z = ((int16_t)rx_data[10]) | ((int16_t)rx_data[11] << 8);
 
-    raw_data_.mouse.pl = rx_data[12];
-    raw_data_.mouse.pr = rx_data[13];
+    raw_data_.mouse.l = rx_data[12];
+    raw_data_.mouse.r = rx_data[13];
 
     raw_data_.keyboard.all = (int16_t)rx_data[14];
 
@@ -102,12 +102,12 @@ void RemoteDjiDR16::DataProcess(uint8_t* rx_data)
 
     /****************************   键鼠数据    ****************************/
 
-    output_.mouse.mouse_x = raw_data_.mouse.x;
-    output_.mouse.mouse_y = raw_data_.mouse.y;
-    output_.mouse.mouse_z = raw_data_.mouse.z;
+    output_.mouse.mouse_x = (float)raw_data_.mouse.x / INT16_MAX;
+    output_.mouse.mouse_y = (float)raw_data_.mouse.y / INT16_MAX;
+    output_.mouse.mouse_z = (float)raw_data_.mouse.z / INT16_MAX;
 
-    output_.mouse.press_l = raw_data_.mouse.pl;
-    output_.mouse.press_r = raw_data_.mouse.pr;
+    output_.mouse.mouse_l = raw_data_.mouse.l;
+    output_.mouse.mouse_r = raw_data_.mouse.r;
 
     output_.keyboard.all = raw_data_.keyboard.all;
 }
@@ -131,9 +131,9 @@ void RemoteDjiDR16::UartRxCpltCallback(uint8_t* buffer)
  */
 void RemoteDjiDR16::ClearData()
 {
-    output_.remote.pitch = K_PITCH * 1024 + C_PITCH;
-    output_.remote.chassis_x = output_.remote.chassis_y = output_.remote.rotation = 1024;
-    output_.remote.switch_l = output_.remote.switch_r = 3;
+    output_.remote.pitch = K_PITCH * MIN_REMOTE_DR16_CHANNLE + C_PITCH;
+    output_.remote.chassis_x = output_.remote.chassis_y = output_.remote.rotation = MIN_REMOTE_DR16_CHANNLE;
+    output_.remote.switch_l = output_.remote.switch_r = SWITCH_MID;
 }
 
 /**

@@ -67,8 +67,8 @@ void RemoteDjiVT02::ClearData()
     output_.mouse_y = 0;
     output_.mouse_z = 0;
 
-    output_.mouse_l = REMOTE_VT02_KEY_STATUS_FREE;
-    output_.mouse_r = REMOTE_VT02_KEY_STATUS_FREE;
+    output_.mouse_lr.mousecode.mouse_l = REMOTE_VT02_KEY_STATUS_FREE;
+    output_.mouse_lr.mousecode.mouse_r = REMOTE_VT02_KEY_STATUS_FREE;
 
     output_.keyboard.all = REMOTE_VT02_KEY_STATUS_FREE;
 }
@@ -99,10 +99,10 @@ void RemoteDjiVT02::AlivePeriodElapsedCallback()
  * 
  * @param current_raw 
  */
-void RemoteDjiVT02::Process_Keyboard_Toggle(Keyboard current_raw)
+void RemoteDjiVT02::Process_Keyboard_Toggle(RemoteVT02Keyboard current_raw)
 {
     static uint16_t last_raw_all = 0;
-    static Keyboard toggle_output = {0};
+    static RemoteVT02Keyboard toggle_output = {0};
 
     uint16_t trigger = current_raw.all & (~last_raw_all);
 
@@ -173,11 +173,11 @@ void RemoteDjiVT02::DataProcess(uint8_t* buffer)
 
 
     output_.mouse_x = (int16_t)raw_data_.mouse_x;
-    output_.mouse_y = (float)raw_data_.mouse_y / (float)INT16_MAX;
+    output_.mouse_y = -(float)raw_data_.mouse_y / (float)INT16_MAX;
     output_.mouse_z = (int16_t)raw_data_.mouse_z;
 
-    output_.mouse_l = raw_data_.mouse_l;
-    output_.mouse_r = raw_data_.mouse_r;
+    output_.mouse_lr.mousecode.mouse_l = raw_data_.mouse_l;
+    output_.mouse_lr.mousecode.mouse_r = raw_data_.mouse_r;
 
     Process_Keyboard_Toggle(raw_data_.keyboard);
 }

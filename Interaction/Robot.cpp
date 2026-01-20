@@ -20,7 +20,8 @@
             (data) = (max);                 \
         } else if((data) <= (min)){         \
             (data) = (min);                 \
-        }}while(0)
+        }                                   \
+    }while(0)
 
 #define REMOTE_PITCH_RATIO        0.1f
 #define AUTOAIM_PITCH_RATIO       350.f
@@ -41,6 +42,9 @@ void Robot::Init()
 
     // vt02遥控初始化
     remote_vt02_.Init(&huart1, uart1_callback_function, UART_BUFFER_LENGTH);
+
+    // dr16遥控初始化
+    // remote_dr16_.Init(&huart3, uart3_callback_function, UART_BUFFER_LENGTH);
 
     // 陀螺仪初始化
     imu_.Init();
@@ -106,7 +110,7 @@ void Robot::Task()
         /****************************   云台   ****************************/
 
 
-        if(remote_vt02_.output_.mouse_r == REMOTE_VT02_KEY_STATUS_FREE)
+        if(remote_vt02_.output_.mouse_lr.mousecode.mouse_r == REMOTE_VT02_KEY_STATUS_FREE)
         {
             remote_radian += (remote_vt02_.output_.mouse_y * PI) * REMOTE_PITCH_RATIO;
 
@@ -115,51 +119,24 @@ void Robot::Task()
             gimbal_.SetTargetPitchRadian(remote_radian);
         }
 
-        if(remote_vt02_.output_.mouse_r == REMOTE_VT02_KEY_STATUS_PRESS)
+        if(remote_vt02_.output_.mouse_lr.mousecode.mouse_r == REMOTE_VT02_KEY_STATUS_PRESS)
         {
-            switch (pc_comm_.recv_autoaim_data.mode)
+            if(pc_comm_.recv_autoaim_data.mode == PC_AUTOAIM_MODE_IDIE)
             {
-                case(AUTOAIM_MODE_IDIE):
-                {
-                    remote_radian += (remote_vt02_.output_.mouse_y * PI) * REMOTE_PITCH_RATIO;
-
-                    INTERVAL_LIMIT(remote_radian, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
-
-                    gimbal_.SetTargetPitchRadian(remote_radian);
-
-                    shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
-
-                    break;
-                }
-                case(AUTOAIM_MODE_FOLLOW):
-                {
-                    float filtered_autoaim =  gimbal_.pitch_autoaim_filter_.Update(pc_comm_.recv_autoaim_data.pitch.pitch_ang);
-
-                    remote_radian -= filtered_autoaim / AUTOAIM_PITCH_RATIO;
-
-                    INTERVAL_LIMIT(remote_radian, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
-
-                    gimbal_.SetTargetPitchRadian(remote_radian);
-
-                    shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
-
-                    break;
-                }
-                case(AUTOAIM_MODE_FIRE):
-                {
-                    float filtered_autoaim =  gimbal_.pitch_autoaim_filter_.Update(pc_comm_.recv_autoaim_data.pitch.pitch_ang);
-
-                    remote_radian -= filtered_autoaim / AUTOAIM_PITCH_RATIO;
-
-                    INTERVAL_LIMIT(remote_radian, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
-
-                    gimbal_.SetTargetPitchRadian(remote_radian);
-
-                    shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
-
-                    break;
-                }
+                remote_radian += (remote_vt02_.output_.mouse_y * PI) * REMOTE_PITCH_RATIO;
             }
+            else 
+            {
+                float filtered_autoaim =  gimbal_.pitch_autoaim_filter_.Update(pc_comm_.recv_autoaim_data.pitch.pitch_ang);
+                
+                remote_radian -= filtered_autoaim / AUTOAIM_PITCH_RATIO;
+            }
+
+            INTERVAL_LIMIT(remote_radian, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
+
+            gimbal_.SetTargetPitchRadian(remote_radian);
+
+            shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
         }
         else if(remote_vt02_.output_.keyboard.keycode.f == REMOTE_VT02_KEY_STATUS_PRESS)
         {

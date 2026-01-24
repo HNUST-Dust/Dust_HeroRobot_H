@@ -11,6 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "Robot.h"
+#include "dvc_remote_dr16.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -40,11 +41,8 @@ void Robot::Init()
 {
     dwt_init(168);
 
-    // vt02遥控初始化
-    remote_vt02_.Init(&huart1, uart1_callback_function, UART_BUFFER_LENGTH);
-
     // dr16遥控初始化
-    // remote_dr16_.Init(&huart3, uart3_callback_function, UART_BUFFER_LENGTH);
+    remote_dr16_.Init(&huart3, uart3_callback_function, UART_BUFFER_LENGTH);
 
     // 陀螺仪初始化
     imu_.Init();
@@ -54,9 +52,6 @@ void Robot::Init()
 
     // 上位机通讯
     pc_comm_.Init();
-
-    // 等待云台yaw角回正
-    osDelay(pdMS_TO_TICKS(5000));
 
     // 云台初始化
     gimbal_.Init();
@@ -107,23 +102,14 @@ void Robot::Task()
         
 
         
-        /****************************   云台   ****************************/
+        /****************************   Gimbal   ****************************/
 
 
-        if(remote_vt02_.output_.mouse_lr.mousecode.mouse_r == REMOTE_VT02_KEY_STATUS_FREE)
-        {
-            remote_radian += (remote_vt02_.output_.mouse_y * PI) * REMOTE_PITCH_RATIO;
-
-            INTERVAL_LIMIT(remote_radian, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
-
-            gimbal_.SetTargetPitchRadian(remote_radian);
-        }
-
-        if(remote_vt02_.output_.mouse_lr.mousecode.mouse_r == REMOTE_VT02_KEY_STATUS_PRESS)
+        if(remote_dr16_.output_.remote.switch_r == SWITCH_UP || remote_dr16_.output_.mouse.press_r == REMOTE_DR16_KEY_STATUS_PRESS)
         {
             if(pc_comm_.recv_autoaim_data.mode == PC_AUTOAIM_MODE_IDIE)
             {
-                remote_radian += (remote_vt02_.output_.mouse_y * PI) * REMOTE_PITCH_RATIO;
+                remote_radian = remote_dr16_.output_.remote.pitch + remote_dr16_.output_.mouse.mouse_y;
             }
             else 
             {
@@ -135,10 +121,23 @@ void Robot::Task()
             INTERVAL_LIMIT(remote_radian, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
 
             gimbal_.SetTargetPitchRadian(remote_radian);
-
-            shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
         }
-        else if(remote_vt02_.output_.keyboard.keycode.f == REMOTE_VT02_KEY_STATUS_PRESS)
+        else if(remote_dr16_.output_.remote.switch_r == SWITCH_DOWN || remote_dr16_.output_.mouse.press_r == REMOTE_DR16_KEY_STATUS_FREE)
+        {
+            remote_radian = remote_dr16_.output_.remote.pitch + remote_dr16_.output_.mouse.mouse_y;
+
+            INTERVAL_LIMIT(remote_radian, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
+
+            gimbal_.SetTargetPitchRadian(remote_radian);
+        }
+    
+        gimbal_.SetImuPitchRadian(normalize_angle_pm_pi(imu_.GetRollAngle()));
+
+
+        /****************************   Mode   ****************************/
+
+
+        if(remote_dr16_.output_.remote.switch_r == SWITCH_UP || remote_dr16_.output_.mouse.press_r || remote_dr16_.output_.keyboard.keycode.e)
         {
             shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
         }
@@ -146,11 +145,6 @@ void Robot::Task()
         {
             shoot_.SetTargetShootOmega(0);
         }
-
-        gimbal_.SetImuPitchRadian(normalize_angle_pm_pi(imu_.GetRollAngle()));
-
-
-        /****************************   调试   ****************************/
 
 
         osDelay(pdMS_TO_TICKS(1));

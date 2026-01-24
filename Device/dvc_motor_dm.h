@@ -312,7 +312,7 @@ protected:
     MotorDmRxDataNormal rx_data_;
 
     // 写变量
-
+    uint32_t alive_heart_ = 0;
     // 读写变量
 
     // 电机控制方式

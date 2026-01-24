@@ -160,7 +160,7 @@ void RemoteDjiVT02::DataProcess(uint8_t* buffer)
     int16_t dy = (int16_t)((uint16_t)buffer[9] | ((uint16_t)buffer[10] << 8));
     int16_t dz = (int16_t)((uint16_t)buffer[11] | ((uint16_t)buffer[12] << 8));
 
-    raw_data_.mouse_x = CLAMP(dx * 20, INT16_MIN, INT16_MAX);
+    raw_data_.mouse_x = CLAMP(dx * 15, INT16_MIN, INT16_MAX);
     raw_data_.mouse_y = CLAMP(dy, INT16_MIN, INT16_MAX);
     raw_data_.mouse_z = CLAMP(dz, INT16_MIN, INT16_MAX);
 
@@ -170,7 +170,6 @@ void RemoteDjiVT02::DataProcess(uint8_t* buffer)
 
 
     /****************************   键鼠数据    ****************************/
-
 
     output_.mouse_x = (int16_t)raw_data_.mouse_x;
     output_.mouse_y = -(float)raw_data_.mouse_y / (float)INT16_MAX;

@@ -26,6 +26,8 @@
 
 /* Exported macros -----------------------------------------------------------*/
 
+#define K_PITCH                   13.f / 13200.f
+#define C_PITCH                   -832.f / 825.f
 #define MAX_PITCH_RADIAN          0.349f
 #define MIN_PITCH_RADIAN          -0.1745f
 
@@ -111,10 +113,10 @@ protected:
 
     // 云台状态
     GimbalControlType gimbal_control_type_ = GIMBAL_CONTROL_TYPE_MANUAL;
+
+    MotorDmStatus now_pitch_status_ = MOTOR_DM_STATUS_ENABLE;
  
     void SelfResolution();
-
-    void MotorNearestTransposition();
 
     void Output();
 

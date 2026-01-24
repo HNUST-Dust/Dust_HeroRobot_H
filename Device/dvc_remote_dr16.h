@@ -8,48 +8,85 @@
  * @copyright Copyright (c) 2025
  * 
  */
-#ifndef __DVC_REMOTE_DJI_DR16_H__
-#define __DVC_REMOTE_DJI_DR16_H__
+#ifndef __DVC_REMOTE_DJI_H__
+#define __DVC_REMOTE_DJI_H__
 
 /* Includes ------------------------------------------------------------------*/
 
 #include "bsp_uart.h"
 #include "FreeRTOS.h"
 #include "cmsis_os2.h"
+#include "app_gimbal.h"
 
 /* Exported macros -----------------------------------------------------------*/
-
-#define MAX_REMOTE_DR16_CHANNLE      1684
-#define MID_REMOTE_DR16_CHANNLE      1024
-#define MIN_REMOTE_DR16_CHANNLE      364
-
-#define MID_REMOTE_DR16_SWITCH_LR    15
 
 /* Exported types ------------------------------------------------------------*/
 
 /**
- * @brief DR16在线状态枚举
+ * @brief DjiDR16存活状态
  * 
  */
 enum RemoteDR16AliveStatus
 {
-    REMOTE_DR16_ALIVE_STATUS_DISABLE = 0,
-    REMOTE_DR16_ALIVE_STATUS_ENABLE  = 1,
+    REMOTE_DJI_STATUS_DISABLE = 0,
+    REMOTE_DJI_STATUS_ENABLE  = 1,
 };
 
 /**
- * @brief DR16拨杆状态枚举
+ * @brief DjiDR16按键状态
  * 
  */
 enum RemoteDR16SwitchStatus
 {
-    SWITCH_UP    = (uint8_t)1,
-    SWITCH_MID   = (uint8_t)3,
-    SWITCH_DOWN  = (uint8_t)2,
+    SWITCH_UP    = 1,
+    SWITCH_MID   = 3,
+    SWITCH_DOWN  = 2,
+};
+
+enum RemoteDR16KeyStatus
+{
+    REMOTE_DR16_KEY_STATUS_FREE = 0,
+    REMOTE_DR16_KEY_STATUS_PRESS,
 };
 
 /**
- * @brief DR16原始数据结构体
+ * @brief DjiDR16键盘联合体
+ * 
+ */
+union RemoteDR16Keyboard
+{
+    uint16_t all;
+    struct
+    {
+        uint16_t w : 1, 
+                 s : 1,
+                 a : 1,
+                 d : 1,
+                 shift : 1, 
+                 ctrl : 1,
+                 q : 1, 
+                 e : 1;
+        uint16_t reserved : 8;
+    } keycode;
+};
+
+/**
+ * @brief 
+ * 
+ */
+union RemoteDR16MouseLR
+{
+    uint8_t all;
+    struct 
+    {
+        uint8_t mouse_l : 2;
+        uint8_t mouse_r : 2;
+        uint8_t reserved : 4;
+    } mousecode;
+};
+
+/**
+ * @brief DjiDR16原始数据
  * 
  */
 struct RemoteDR16RawData
@@ -62,54 +99,39 @@ struct RemoteDR16RawData
 
     struct
     {
-        int16_t x, y, z;
-        uint8_t l, r;
+        int32_t x, y, z;
+        uint8_t pl, pr;
     } mouse;
 
-    struct 
-    {
-        uint16_t all;
-    } keyboard;
+    RemoteDR16Keyboard keyboard;
 };
 
 /**
- * @brief DR16输出数据结构体
+ * @brief DjiDR16输出
  * 
  */
 struct RemoteDR16OutputData
 {
     struct 
     {
-        float chassis_x, chassis_y, rotation, pitch;
         uint8_t switch_l, switch_r;
-    } remote;
+        float chassis_x, chassis_y;      // x, y, r 采用右手系
+        float rotation;
+        float pitch;
+    } remote;                            // 遥控数据
 
     struct
     {
-        float mouse_x, mouse_y, mouse_z;
-        uint8_t mouse_l, mouse_r;
-    } mouse;
+        uint16_t mouse_x;
+        float mouse_y;
+        uint8_t press_l, press_r;
+    } mouse;                             // 鼠标数据
 
-    union
-    {
-        uint16_t all;
-        struct
-        {
-            uint16_t w : 1; 
-            uint16_t s : 1;
-            uint16_t a : 1;
-            uint16_t d : 1;
-            uint16_t q : 1; 
-            uint16_t e : 1;
-            uint16_t shift : 1;
-            uint16_t ctrl : 1;
-            uint16_t reserved : 8;
-        } keycode;
-    } keyboard;
+    RemoteDR16Keyboard keyboard;         // 键盘数据
 };
 
 /**
- * @brief DR16遥控器
+ * @brief DjiDR16遥控器
  * 
  */
 class RemoteDjiDR16
@@ -119,7 +141,7 @@ public:
     RemoteDR16OutputData output_;
 
     // 遥控器状态
-    RemoteDR16AliveStatus remote_dr16_alive_status = REMOTE_DR16_ALIVE_STATUS_DISABLE;
+    RemoteDR16AliveStatus remote_dji_alive_status = REMOTE_DJI_STATUS_DISABLE;
 
     void Init(UART_HandleTypeDef *huart, Uart_Callback callback_function, uint16_t rx_buffer_length);
 
@@ -131,7 +153,7 @@ public:
 
     static void TaskEntry(void *param);  // FreeRTOS 入口，静态函数
 
-private:
+protected:
     // uart管理模块
     UartManageObject* uart_manage_object_;
 
@@ -144,18 +166,15 @@ private:
     // 前一时刻flag
     uint32_t pre_flag_ = 0;
 
-    // 掉线清理数据函数
-
     void ClearData();
 
-    // 内部数据处理函数
+    void Process_Keyboard_Toggle(RemoteDR16Keyboard current_raw);
 
-    void DataProcess(uint8_t* rx_data);
+    void DataProcess(uint8_t* buffer);
 };
 
 /* Exported variables --------------------------------------------------------*/
 
 /* Exported function declarations --------------------------------------------*/
-
 
 #endif

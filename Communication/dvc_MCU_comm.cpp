@@ -145,10 +145,10 @@ void McuComm::CanSendAutoaimData()
  */
 void McuComm::ClearData()
 {
-     send_chassis_data_.chassis_speed_x = MID_REMOTE_DR16_CHANNLE;
-     send_chassis_data_.chassis_speed_y = MID_REMOTE_DR16_CHANNLE;
-     send_chassis_data_.rotation = MID_REMOTE_DR16_CHANNLE;
-     send_chassis_data_.switch_lr.all = MID_REMOTE_DR16_SWITCH_LR;
+     send_chassis_data_.chassis_speed_x = 1024;
+     send_chassis_data_.chassis_speed_y = 1024;
+     send_chassis_data_.rotation = 1024;
+     send_chassis_data_.switch_lr.switchcode.switch_l = send_chassis_data_.switch_lr.switchcode.switch_l = 3;
 
      send_command_data_.mouse_lr.all = 0;
      send_command_data_.keyboard.all = 0;

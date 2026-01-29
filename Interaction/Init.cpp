@@ -138,8 +138,8 @@ void uart3_callback_function(uint8_t* buffer, uint16_t length)
 
     robot_.mcu_comm_.send_command_data_.start_of_frame     = 0xAB;
 
-    robot_.mcu_comm_.send_command_data_.mouse_lr.mousecode.mouse_l = robot_.remote_dr16_.output_.mouse.press_l;
-    robot_.mcu_comm_.send_command_data_.mouse_lr.mousecode.mouse_r = robot_.remote_dr16_.output_.mouse.press_r;
+    robot_.mcu_comm_.send_command_data_.mouse_lr.mousecode.mouse_l = robot_.remote_dr16_.output_.mouse.mouse_lr.mousecode.mouse_l;
+    robot_.mcu_comm_.send_command_data_.mouse_lr.mousecode.mouse_r = robot_.remote_dr16_.output_.mouse.mouse_lr.mousecode.mouse_r;
     robot_.mcu_comm_.send_command_data_.keyboard.all = robot_.remote_dr16_.output_.keyboard.all;
 }
 

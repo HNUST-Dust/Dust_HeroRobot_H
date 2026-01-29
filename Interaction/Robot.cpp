@@ -11,7 +11,6 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "Robot.h"
-#include "dvc_remote_dr16.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -105,7 +104,7 @@ void Robot::Task()
         /****************************   Gimbal   ****************************/
 
 
-        if(remote_dr16_.output_.remote.switch_r == SWITCH_UP || remote_dr16_.output_.mouse.press_r == REMOTE_DR16_KEY_STATUS_PRESS)
+        if(remote_dr16_.output_.remote.switch_r == SWITCH_UP || remote_dr16_.output_.mouse.mouse_lr.mousecode.mouse_r == REMOTE_KEY_STATUS_PRESS)
         {
             if(pc_comm_.recv_autoaim_data.mode == PC_AUTOAIM_MODE_IDIE)
             {
@@ -122,7 +121,7 @@ void Robot::Task()
 
             gimbal_.SetTargetPitchRadian(remote_radian);
         }
-        else if(remote_dr16_.output_.remote.switch_r == SWITCH_DOWN || remote_dr16_.output_.mouse.press_r == REMOTE_DR16_KEY_STATUS_FREE)
+        else if(remote_dr16_.output_.remote.switch_r == SWITCH_DOWN || remote_dr16_.output_.mouse.mouse_lr.mousecode.mouse_r == REMOTE_KEY_STATUS_FREE)
         {
             remote_radian = remote_dr16_.output_.remote.pitch + remote_dr16_.output_.mouse.mouse_y;
 
@@ -137,7 +136,7 @@ void Robot::Task()
         /****************************   Mode   ****************************/
 
 
-        if(remote_dr16_.output_.remote.switch_r == SWITCH_UP || remote_dr16_.output_.mouse.press_r || remote_dr16_.output_.keyboard.keycode.e)
+        if(remote_dr16_.output_.remote.switch_r == SWITCH_UP || remote_dr16_.output_.mouse.mouse_lr.mousecode.mouse_r || remote_dr16_.output_.keyboard.keycode.e)
         {
             shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
         }
@@ -145,7 +144,7 @@ void Robot::Task()
         {
             shoot_.SetTargetShootOmega(0);
         }
-
+        
 
         osDelay(pdMS_TO_TICKS(1));
     }

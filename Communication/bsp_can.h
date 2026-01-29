@@ -97,6 +97,7 @@ void can_filter_mask_config(CAN_HandleTypeDef *hcan, uint8_t object_para, uint32
 uint8_t can_send_data(CAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data, uint16_t length);
 
 void can_period_elapsed_callback();
+
 #ifdef __cplusplus
 }
 #endif

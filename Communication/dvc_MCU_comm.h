@@ -72,7 +72,7 @@ struct McuChassisData
  */
 struct McuCommandData
 {
-    uint8_t             start_of_frame = 0xAB;
+    uint8_t start_of_frame = 0xAB;
 
     union 
     {

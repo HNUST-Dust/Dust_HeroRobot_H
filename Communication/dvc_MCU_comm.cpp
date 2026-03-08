@@ -11,7 +11,6 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "dvc_MCU_comm.h"
-#include "dvc_remote_dr16.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -94,7 +93,7 @@ void McuComm::CanSendChassisData()
      can_tx_frame[5] = send_chassis_data_.rotation >> 8;
      can_tx_frame[6] = send_chassis_data_.rotation;
 
-     can_tx_frame[7] = send_chassis_data_.switch_lr.all;
+     can_tx_frame[7] = send_chassis_data_.all;
 
      can_send_data(can_manage_object_->can_handler, can_tx_id_, can_tx_frame, 8);
 }
@@ -148,7 +147,7 @@ void McuComm::ClearData()
      send_chassis_data_.chassis_speed_x = 1024;
      send_chassis_data_.chassis_speed_y = 1024;
      send_chassis_data_.rotation = 1024;
-     send_chassis_data_.switch_lr.switchcode.switch_l = send_chassis_data_.switch_lr.switchcode.switch_l = 3;
+     send_chassis_data_.all = 0;
 
      send_command_data_.mouse_lr.all = 0;
      send_command_data_.keyboard.all = 0;

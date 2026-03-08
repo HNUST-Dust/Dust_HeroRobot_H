@@ -40,8 +40,8 @@ void Robot::Init()
 {
     dwt_init(168);
 
-    // dr16遥控初始化
-    remote_dr16_.Init(&huart3, uart3_callback_function, UART_BUFFER_LENGTH);
+    // 遥控初始化
+    remote_vt03_.Init(&huart1, uart1_callback_function, UART_BUFFER_LENGTH);
 
     // 陀螺仪初始化
     imu_.Init();
@@ -98,17 +98,16 @@ void Robot::Task()
         /****************************   PCcomm   ****************************/
 
         
-        
 
         
         /****************************   Gimbal   ****************************/
 
 
-        if(remote_dr16_.output_.remote.switch_r == SWITCH_UP || remote_dr16_.output_.mouse.mouse_lr.mousecode.mouse_r == REMOTE_KEY_STATUS_PRESS)
+        if(remote_vt03_.output_.remote.fn2 || remote_vt03_.output_.mouse.mouse_r == REMOTE_KEY_STATUS_PRESS)
         {
             if(pc_comm_.recv_autoaim_data.mode == PC_AUTOAIM_MODE_IDIE)
             {
-                remote_radian = remote_dr16_.output_.remote.pitch + remote_dr16_.output_.mouse.mouse_y;
+                remote_radian = remote_vt03_.output_.remote.pitch + remote_vt03_.output_.mouse.mouse_y;
             }
             else 
             {
@@ -121,9 +120,9 @@ void Robot::Task()
 
             gimbal_.SetTargetPitchRadian(remote_radian);
         }
-        else if(remote_dr16_.output_.remote.switch_r == SWITCH_DOWN || remote_dr16_.output_.mouse.mouse_lr.mousecode.mouse_r == REMOTE_KEY_STATUS_FREE)
+        else if(!remote_vt03_.output_.remote.fn2 || remote_vt03_.output_.mouse.mouse_r == REMOTE_KEY_STATUS_FREE)
         {
-            remote_radian = remote_dr16_.output_.remote.pitch + remote_dr16_.output_.mouse.mouse_y;
+            remote_radian = remote_vt03_.output_.remote.pitch + remote_vt03_.output_.mouse.mouse_y;
 
             INTERVAL_LIMIT(remote_radian, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
 
@@ -136,7 +135,7 @@ void Robot::Task()
         /****************************   Mode   ****************************/
 
 
-        if(remote_dr16_.output_.remote.switch_r == SWITCH_UP || remote_dr16_.output_.mouse.mouse_lr.mousecode.mouse_r || remote_dr16_.output_.keyboard.keycode.e)
+        if(remote_vt03_.output_.remote.fn2 || remote_vt03_.output_.mouse.mouse_r || remote_vt03_.output_.keyboard.e)
         {
             shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
         }

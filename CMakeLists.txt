@@ -81,6 +81,8 @@ include_directories(
         Bsp
         Communication
         Device
+        Device/motors
+        Device/remotes
         Interaction
         Modules
 )

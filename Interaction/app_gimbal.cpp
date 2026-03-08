@@ -70,9 +70,6 @@ void Gimbal::Init()
     motor_pitch_.CanSendClearError();
     osDelay(pdMS_TO_TICKS(1000));
 
-    // motor_pitch_.CanSendSaveZero();
-    // osDelay(pdMS_TO_TICKS(1000));
-
     motor_pitch_.CanSendEnter();
     osDelay(pdMS_TO_TICKS(1000));
 
@@ -153,17 +150,13 @@ void Gimbal::Task()
     for (;;)
     {
         SelfResolution();
-        if(now_pitch_status_ == MOTOR_DM_STATUS_ENABLE)
-        {
+
+        if(now_pitch_status_ == MOTOR_DM_STATUS_ENABLE) {
             Output();
-        }
-        else
-        {
+        } else {
             motor_pitch_.CanSendEnter();
             osDelay(pdMS_TO_TICKS(100));
         }
-
-        // printf("%d\n", now_pitch_status_);
         
         osDelay(pdMS_TO_TICKS(1));
     }

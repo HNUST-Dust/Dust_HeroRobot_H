@@ -15,8 +15,6 @@
 
 #include "bsp_can.h"
 #include "dvc_PC_comm.h"
-#include "dvc_remote_dr16.h"
-#include "dvc_remote_vt02.h"
 #include "FreeRTOS.h"
 #include "cmsis_os2.h"
 
@@ -59,11 +57,14 @@ struct McuChassisData
         uint8_t all;
         struct
         {
-            uint8_t switch_l : 2;
-            uint8_t switch_r : 2;
-            uint8_t reserved : 4;
-        } switchcode;
-    } switch_lr;
+            uint8_t pause : 1;
+            uint8_t cns : 2;
+            uint8_t fn1 : 1;
+            uint8_t fn2 : 1;
+            uint8_t trigger : 1;
+            uint8_t reserved : 2;
+        };
+    };
 };
 
 /**
@@ -82,7 +83,7 @@ struct McuCommandData
             uint8_t mouse_l : 2;
             uint8_t mouse_r : 2;
             uint8_t reserved : 4;
-        } mousecode;
+        };
     } mouse_lr;
     
     union
@@ -106,7 +107,7 @@ struct McuCommandData
             uint8_t c : 1;
             uint8_t v : 1;
             uint8_t b : 1;
-        } keycode;
+        };
     } keyboard;
 
     McuConv             imu_yaw;                    // yaw轴角度

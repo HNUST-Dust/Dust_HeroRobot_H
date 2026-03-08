@@ -15,13 +15,13 @@
 
 #include "bsp_dwt.h"
 
-#include "dvc_remote_dr16.h"
-#include "dvc_remote_vt02.h"
+#include "dvc_remote_vt03.h"
 #include "dvc_MCU_comm.h"
 #include "dvc_PC_comm.h"
 
 #include "app_gimbal.h"
 #include "app_shoot.h"
+
 #include "imu.hpp"
 
 #include "stdio.h"
@@ -33,7 +33,8 @@
 class Robot
 {
 public:
-    RemoteDjiDR16 remote_dr16_;
+    // 遥控器
+    RemoteDjiVT03 remote_vt03_;
     // 上下板通讯
     McuComm mcu_comm_;
     // pitch角云台

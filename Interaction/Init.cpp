@@ -12,6 +12,7 @@
 
 #include "Init.h"
 #include "Robot.h"
+#include "bsp_uart.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -80,26 +81,15 @@ void can2_callback_function(CanRxBuffer* CAN_RxMessage)
  */
 void uart1_callback_function(uint8_t* buffer, uint16_t length) 
 {	
-	// robot_.remote_vt02_.UartRxCpltCallback(buffer);
-}
-
-/**
- * @brief dr16回调函数
- * 
- * @param buffer 
- * @param length 
- */
-void uart3_callback_function(uint8_t* buffer, uint16_t length) 
-{	
-	robot_.remote_dr16_.UartRxCpltCallback(buffer);
+	robot_.remote_vt03_.UartRxCpltCallback(buffer);
 
     robot_.mcu_comm_.send_chassis_data_.start_of_frame   = 0xAA;
     
-    if(robot_.remote_dr16_.output_.keyboard.keycode.w)
+    if(robot_.remote_vt03_.output_.keyboard.w)
     {
         robot_.mcu_comm_.send_chassis_data_.chassis_speed_x = 1684;
     }
-    else if (robot_.remote_dr16_.output_.keyboard.keycode.s)
+    else if (robot_.remote_vt03_.output_.keyboard.s)
     {
         robot_.mcu_comm_.send_chassis_data_.chassis_speed_x = 364;
     }
@@ -108,11 +98,11 @@ void uart3_callback_function(uint8_t* buffer, uint16_t length)
         robot_.mcu_comm_.send_chassis_data_.chassis_speed_x = 1024;
     }
 
-    if(robot_.remote_dr16_.output_.keyboard.keycode.a)
+    if(robot_.remote_vt03_.output_.keyboard.a)
     {
         robot_.mcu_comm_.send_chassis_data_.chassis_speed_y = 364;
     }
-    else if (robot_.remote_dr16_.output_.keyboard.keycode.d)
+    else if (robot_.remote_vt03_.output_.keyboard.d)
     {
         robot_.mcu_comm_.send_chassis_data_.chassis_speed_y = 1684;
     }
@@ -123,24 +113,35 @@ void uart3_callback_function(uint8_t* buffer, uint16_t length)
 
     if(robot_.mcu_comm_.send_chassis_data_.chassis_speed_x == 1024)
     {
-        robot_.mcu_comm_.send_chassis_data_.chassis_speed_x  = robot_.remote_dr16_.output_.remote.chassis_x;
+        robot_.mcu_comm_.send_chassis_data_.chassis_speed_x  = robot_.remote_vt03_.output_.remote.chassis_x;
     }
     if(robot_.mcu_comm_.send_chassis_data_.chassis_speed_y == 1024)
     {
-        robot_.mcu_comm_.send_chassis_data_.chassis_speed_y  = robot_.remote_dr16_.output_.remote.chassis_y;
+        robot_.mcu_comm_.send_chassis_data_.chassis_speed_y  = robot_.remote_vt03_.output_.remote.chassis_y;
     }
 
-    robot_.mcu_comm_.send_chassis_data_.rotation = robot_.remote_dr16_.output_.remote.rotation -  robot_.remote_dr16_.output_.mouse.mouse_x + 1024;
+    robot_.mcu_comm_.send_chassis_data_.rotation = robot_.remote_vt03_.output_.remote.rotation -  robot_.remote_vt03_.output_.mouse.mouse_x + 1024;
 
-    robot_.mcu_comm_.send_chassis_data_.switch_lr.switchcode.switch_l = robot_.remote_dr16_.output_.remote.switch_l;
-    robot_.mcu_comm_.send_chassis_data_.switch_lr.switchcode.switch_r = robot_.remote_dr16_.output_.remote.switch_r;
+    robot_.mcu_comm_.send_chassis_data_.all = robot_.remote_vt03_.output_.remote.all;
 
 
     robot_.mcu_comm_.send_command_data_.start_of_frame     = 0xAB;
 
-    robot_.mcu_comm_.send_command_data_.mouse_lr.mousecode.mouse_l = robot_.remote_dr16_.output_.mouse.mouse_lr.mousecode.mouse_l;
-    robot_.mcu_comm_.send_command_data_.mouse_lr.mousecode.mouse_r = robot_.remote_dr16_.output_.mouse.mouse_lr.mousecode.mouse_r;
-    robot_.mcu_comm_.send_command_data_.keyboard.all = robot_.remote_dr16_.output_.keyboard.all;
+    robot_.mcu_comm_.send_command_data_.mouse_lr.mouse_l = robot_.remote_vt03_.output_.mouse.mouse_l;
+    robot_.mcu_comm_.send_command_data_.mouse_lr.mouse_r = robot_.remote_vt03_.output_.mouse.mouse_r;
+    
+    robot_.mcu_comm_.send_command_data_.keyboard.all = robot_.remote_vt03_.output_.keyboard.all;
+}
+
+/**
+ * @brief dr16回调函数
+ * 
+ * @param buffer 
+ * @param length 
+ */
+void uart3_callback_function(uint8_t* buffer, uint16_t length) 
+{	
+	
 }
 
 /**
@@ -168,7 +169,11 @@ void usb_tx_callback(uint16_t len)
 void Init()
 {
     usb_init(usb_tx_callback, usb_rx_callback);
+
     can_init(&hcan1, can1_callback_function);
     can_init(&hcan2, can2_callback_function);
+
+    uart_init(&huart6, nullptr, UART_BUFFER_LENGTH);
+
     robot_.Init();
 }

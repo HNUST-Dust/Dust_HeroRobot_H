@@ -8,8 +8,7 @@
  * @copyright Copyright (c) 2025
  * 
  */
-#ifndef MODULES_COMM_H
-#define MODULES_COMM_H
+#pragma once
 
 /* Includes ------------------------------------------------------------------*/
 
@@ -110,7 +109,7 @@ struct McuCommandData
         };
     } keyboard;
 
-    McuConv             imu_yaw;                    // yaw轴角度
+    McuConv imu_yaw;                    // yaw轴角度
 };
 
 /**
@@ -119,19 +118,19 @@ struct McuCommandData
  */
 struct McuSendAutoaimData
 {
-    uint8_t         start_of_frame = 0xAC;
-    uint8_t         mode;
-    McuConv         autoaim_yaw_angle;          // 自瞄yaw轴角度
+    uint8_t start_of_frame = 0xAC;
+    uint8_t mode;
+    McuConv autoaim_yaw_angle;          // 自瞄yaw轴角度
 };
 
 /**
- * @brief Mcu发送自瞄数据结构体
+ * @brief Mcu接收裁判系统数据结构体
  * 
  */
-struct McuRecvAutoaimData
+struct McuRecvRefereeData
 {
-    uint8_t         start_of_yaw_frame = 0xAC;
-    McuConv         autoaim_yaw_angle;
+    uint8_t start_of_yaw_frame = 0xAF;
+    float bullet_speed;
 };
 
 /**
@@ -165,10 +164,10 @@ public:
         {0,0,0,0},
     };
 
-    McuRecvAutoaimData recv_autoaim_data_ = 
+    McuRecvRefereeData recv_referee_data_ = 
     {
-        0xAC,
-        {0,0,0,0},
+        0xAF,
+        0.0f,
     };
 
     void Init(CAN_HandleTypeDef *hcan, uint8_t can_rx_id, uint8_t can_tx_id);
@@ -182,8 +181,6 @@ public:
     void CanSendCommandData();
     
     void CanSendAutoaimData();
-
-    void UpdataAutoaimData(PCRecvAutoAimData* pc_recv_autoaim_data);
 
     void CanRxCpltCallback(uint8_t *rx_data);
 
@@ -223,5 +220,3 @@ inline McuAliveState McuComm::GetMcuAliveState()
 {
     return (mcu_alive_state_);
 }
-
-#endif

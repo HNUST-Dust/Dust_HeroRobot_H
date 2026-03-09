@@ -11,6 +11,9 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "dvc_remote_vt03.h"
+#include "app_gimbal.h"
+#include <algorithm>
+#include <cmath>
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -49,32 +52,36 @@ void RemoteDjiVT03::ClearData()
  */
 void RemoteDjiVT03::DataProcess(uint8_t* buffer)
 {
-    RmoteVT03RawData const* temp = reinterpret_cast<RmoteVT03RawData const*>(buffer);
+    raw_data_ = reinterpret_cast<RmoteVT03RawData const*>(buffer);
 
-    if (temp->start_of_frame_1 != 0xA9 && temp->start_of_frame_2 != 0x53) {
+    if (raw_data_->start_of_frame_1 != 0xA9 && raw_data_->start_of_frame_2 != 0x53) {
         return;
     }
 
-    output_.remote.pitch = K_PITCH * temp->channel_2 + C_PITCH;
+    output_.remote.pitch = K_PITCH * raw_data_->channel_2 + C_PITCH;
     output_.remote.pitch = CLAMP(output_.remote.pitch, MIN_PITCH_RADIAN, MAX_PITCH_RADIAN);
 
-    output_.remote.chassis_y = temp->channel_0;
-    output_.remote.chassis_x = temp->channel_1;
-    output_.remote.rotation = temp->channel_3;
-    output_.remote.thumbwheel = temp->wheel;
+    output_.remote.chassis_y = raw_data_->channel_0;
+    output_.remote.chassis_x = raw_data_->channel_1;
+    output_.remote.rotation = raw_data_->channel_3;
+    output_.remote.thumbwheel = raw_data_->wheel;
 
-    output_.remote.cns = temp->cns;
-    output_.remote.fn1 = temp->fn_1;
-    output_.remote.fn2 = temp->fn_2;
-    output_.remote.trigger = temp->trigger;
-    output_.remote.pause = temp->pause;
+    output_.remote.cns = raw_data_->cns;
+    output_.remote.fn1 = raw_data_->fn_1;
+    output_.remote.fn2 = raw_data_->fn_2;
+    output_.remote.trigger = raw_data_->trigger;
+    output_.remote.pause = raw_data_->pause;
+
+    int16_t dx = std::clamp(raw_data_->mouse_x * 30, INT16_MIN, INT16_MAX);
+    int16_t dy = std::clamp(raw_data_->mouse_y * 2, INT16_MIN, INT16_MAX);
     
-    output_.mouse.mouse_x = (int16_t)(1683 + 1320 * ((int16_t)temp->mouse_x - 32767) / 65535);
-    output_.mouse.mouse_y = -(float)temp->mouse_y / (float)INT16_MAX;
-    // output_.mouse.mouse_z = (int16_t)temp->mouse_z;
+    output_.mouse.mouse_x = (int16_t)(1683 + 1320 * ((int16_t)dx - 32767) / 65535);
+    output_.mouse.mouse_y = -(float)dy / (float)INT16_MAX;
+    output_.mouse.mouse_y = std::clamp(output_.mouse.mouse_y, MIN_PITCH_RADIAN, MAX_PITCH_RADIAN);
+    // output_.mouse.mouse_z = (int16_t)raw_data_->mouse_z;
 
-    output_.mouse.mouse_l = temp->mouse_l;
-    output_.mouse.mouse_r = temp->mouse_r;
+    output_.mouse.mouse_l = raw_data_->mouse_l;
+    output_.mouse.mouse_r = raw_data_->mouse_r;
 
-    Process_Keyboard_Toggle(&output_.keyboard, temp->keyboard);
+    Process_Keyboard_Toggle(&output_.keyboard, raw_data_->keyboard);
 }

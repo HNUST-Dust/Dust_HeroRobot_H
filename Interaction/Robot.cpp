@@ -11,6 +11,9 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "Robot.h"
+#include "cmsis_gcc.h"
+#include "cmsis_os2.h"
+#include "dvc_MCU_comm.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -39,6 +42,8 @@
 void Robot::Init()
 {
     dwt_init(168);
+
+    osDelay(100);
 
     // 遥控初始化
     remote_vt03_.Init(&huart1, uart1_callback_function, UART_BUFFER_LENGTH);
@@ -85,12 +90,17 @@ void Robot::TaskEntry(void *argument)
  */
 void Robot::Task()
 {
+    McuRecvRefereeData mcu_referee_data_local;
+    mcu_referee_data_local.bullet_speed = 0.0f;
+
     for(;;)
     {
         /****************************   MCUcomm   ****************************/
 
 
-        mcu_comm_.UpdataAutoaimData(&pc_comm_.recv_autoaim_data);
+        __disable_irq();
+        mcu_referee_data_local = *(static_cast<McuRecvRefereeData*>(&(mcu_comm_.recv_referee_data_)));
+        __enable_irq();
 
         mcu_comm_.CanSendAutoaimData();
 
@@ -98,12 +108,13 @@ void Robot::Task()
         /****************************   PCcomm   ****************************/
 
         
+        pc_comm_.UpdataAutoaimData(mcu_referee_data_local);
 
         
         /****************************   Gimbal   ****************************/
 
 
-        if(remote_vt03_.output_.remote.fn2 || remote_vt03_.output_.mouse.mouse_r == REMOTE_KEY_STATUS_PRESS)
+        if(remote_vt03_.output_.remote.fn2 || remote_vt03_.output_.mouse.mouse_r)
         {
             if(pc_comm_.recv_autoaim_data.mode == PC_AUTOAIM_MODE_IDIE)
             {
@@ -120,7 +131,7 @@ void Robot::Task()
 
             gimbal_.SetTargetPitchRadian(remote_radian);
         }
-        else if(!remote_vt03_.output_.remote.fn2 || remote_vt03_.output_.mouse.mouse_r == REMOTE_KEY_STATUS_FREE)
+        else if(!remote_vt03_.output_.remote.fn2 || !remote_vt03_.output_.mouse.mouse_r)
         {
             remote_radian = remote_vt03_.output_.remote.pitch + remote_vt03_.output_.mouse.mouse_y;
 
@@ -135,7 +146,7 @@ void Robot::Task()
         /****************************   Mode   ****************************/
 
 
-        if(remote_vt03_.output_.remote.fn2 || remote_vt03_.output_.mouse.mouse_r || remote_vt03_.output_.keyboard.e)
+        if(remote_vt03_.output_.remote.fn2 || remote_vt03_.output_.mouse.mouse_r || remote_vt03_.output_.keyboard.f)
         {
             shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
         }
@@ -144,7 +155,6 @@ void Robot::Task()
             shoot_.SetTargetShootOmega(0);
         }
         
-
         osDelay(pdMS_TO_TICKS(1));
     }
 }

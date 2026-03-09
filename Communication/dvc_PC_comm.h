@@ -8,21 +8,22 @@
  * @copyright Copyright (c) 2025
  * 
  */
-#ifndef PC_COMM_H
-#define PC_COMM_H
+#pragma once
 
 /* Includes ------------------------------------------------------------------*/
 
 #include "FreeRTOS.h"
 #include "cmsis_os2.h"
 #include "ins_task.h"
-#include "bsp_dwt.h"
 #include "bsp_usb.h"
 #include "crc.h"
+#include "dvc_MCU_comm.h"
 
 /* Exported macros -----------------------------------------------------------*/
 
 /* Exported types ------------------------------------------------------------*/
+
+struct McuRecvRefereeData;
 
 /**
  * @brief PcComm转换联合体
@@ -154,7 +155,7 @@ public:
 
     void RxCpltCallback();
 
-    void UpdataAutoaimData();
+    void UpdataAutoaimData(McuRecvRefereeData& referee_data);
 
 private:
     uint32_t flag_ = 0;
@@ -179,4 +180,3 @@ private:
 
 /* Exported function declarations --------------------------------------------*/
 
-#endif

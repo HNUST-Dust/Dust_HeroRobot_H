@@ -1,21 +1,22 @@
 /**
  * @file bsp_can.h
- * @author noe (noneofever@gmail.com)
+ * @author qingyu
  * @brief 
  * @version 0.1
- * @date 2025-08-02
+ * @date 2026-03-09
  * 
- * @copyright Copyright (c) 2025
+ * @copyright Copyright (c) 2026
  * 
  */
 #ifndef BSP_CAN_H_
 #define BSP_CAN_H_
+
 #ifdef __cplusplus
 extern "C"{
 #endif
+
 /* Includes ------------------------------------------------------------------*/
 
-#include "stm32f4xx_hal.h"
 #include "can.h"
 
 /* Exported macros -----------------------------------------------------------*/
@@ -101,6 +102,5 @@ void can_period_elapsed_callback();
 #ifdef __cplusplus
 }
 #endif
-#endif // BSP_CAN_H_
 
-/************************ COPYRIGHT(C) HNUST-DUST **************************/
+#endif

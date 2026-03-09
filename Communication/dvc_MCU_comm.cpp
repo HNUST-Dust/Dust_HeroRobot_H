@@ -11,6 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "dvc_MCU_comm.h"
+#include "string.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -61,17 +62,6 @@ void McuComm::TaskEntry(void *argument)
 {
      McuComm *self = static_cast<McuComm *>(argument);  // 还原 this 指针
      self->Task();  // 调用成员函数
-}
-
-/**
- * @brief McuComm更新自瞄数据
- * 
- * @param pc_recv_autoaim_data 
- */
-void McuComm::UpdataAutoaimData(PCRecvAutoAimData* pc_recv_autoaim_data)
-{
-     send_autoaim_data_.mode = pc_recv_autoaim_data->mode;
-     send_autoaim_data_.autoaim_yaw_angle.f = pc_recv_autoaim_data->yaw.yaw_ang;
 }
 
 /**
@@ -214,6 +204,9 @@ void McuComm::DataProcess(uint8_t* rx_data)
      // 处理数据 , 解包
      switch (rx_data[0])
      {
-         
+          case (0xAF):
+          {
+               memcpy(&recv_referee_data_.bullet_speed, &rx_data[1], 4);
+          }
      }
 }

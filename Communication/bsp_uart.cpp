@@ -59,8 +59,8 @@ int _write(int file, char *ptr, int len)
 {
     UartManageObject* uart_obj = &uart6_manage_object;
     
-    // 进入临界区，防止多线程并发访问
-    taskENTER_CRITICAL();
+    // 使用 ISR 安全版本的临界区，兼容中断和任务上下文
+    UBaseType_t uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
     
     for (int i = 0; i < len; i++) 
 	{
@@ -89,7 +89,7 @@ int _write(int file, char *ptr, int len)
         }
     }
     
-    taskEXIT_CRITICAL();
+    taskEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
     
     return len;
 }

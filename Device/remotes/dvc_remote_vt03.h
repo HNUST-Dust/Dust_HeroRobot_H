@@ -47,7 +47,7 @@ struct RmoteVT03RawData
     uint8_t reserved_2 : 2;
     RemoteKeyboard keyboard;
     uint16_t crc16;
-};
+} __attribute__((packed));
 
 /**
  * @brief VT03输出数据结构体
@@ -88,9 +88,11 @@ class RemoteDjiVT03 : public Remote
 {
 public:
     // 遥控器输出数据
-    RemoteVT03OutputData output_;
+    RemoteVT03OutputData output_{};
 
 private:
+
+    const RmoteVT03RawData* raw_data_{};
 
     void ClearData() override;
 

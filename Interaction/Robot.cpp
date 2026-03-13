@@ -43,8 +43,6 @@ void Robot::Init()
 {
     dwt_init(168);
 
-    osDelay(100);
-
     // 遥控初始化
     remote_vt03_.Init(&huart1, uart1_callback_function, UART_BUFFER_LENGTH);
 
@@ -101,6 +99,10 @@ void Robot::Task()
         __disable_irq();
         mcu_referee_data_local = *(static_cast<McuRecvRefereeData*>(&(mcu_comm_.recv_referee_data_)));
         __enable_irq();
+
+        if (!remote_vt03_.remote_alive_status) {
+            mcu_comm_.ClearData();
+        }
 
         mcu_comm_.CanSendAutoaimData();
 

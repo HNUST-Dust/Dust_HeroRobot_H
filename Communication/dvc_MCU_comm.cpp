@@ -44,6 +44,8 @@ void McuComm::Init(CAN_HandleTypeDef* hcan, uint8_t can_rx_id, uint8_t can_tx_id
      can_rx_id_ = can_rx_id;
      can_tx_id_ = can_tx_id;
 
+     send_autoaim_data_.first_power_on = true;
+
      static const osThreadAttr_t kMcuCommTaskAttr = {
           .name = "mcu_comm_task",
           .stack_size = 512,
@@ -122,7 +124,13 @@ void McuComm::CanSendAutoaimData()
 
      memcpy(&can_tx_frame[2], &send_autoaim_data_.autoaim_yaw_angle, 4);
 
-     can_tx_frame[6] = 0x00;
+     if (send_autoaim_data_.first_power_on) {
+          can_tx_frame[6] = 0x01;
+          send_autoaim_data_.first_power_on = false;
+     } else if (!send_autoaim_data_.first_power_on) {
+          can_tx_frame[6] = 0x00;
+     }
+
      can_tx_frame[7] = 0x00;
 
      can_send_data(can_manage_object_->can_handler, can_tx_id_, can_tx_frame, 8);
@@ -138,6 +146,7 @@ void McuComm::ClearData()
      send_chassis_data_.chassis_speed_y = 1024;
      send_chassis_data_.rotation = 1024;
      send_chassis_data_.all = 0;
+     send_chassis_data_.cns = 1;
 
      send_command_data_.mouse_lr.all = 0;
      send_command_data_.keyboard.all = 0;

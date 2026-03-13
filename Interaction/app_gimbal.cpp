@@ -107,7 +107,7 @@ void Gimbal::SelfResolution()
     motor_pitch_.AlivePeriodElapsedCallback();
 
     // 获取当前数据
-    now_pitch_status_ = motor_pitch_.GetStatus();
+    now_pitch_status_ = motor_pitch_.GetControlStatus();
     now_pitch_omega_ = motor_pitch_.GetNowOmega();                                          // 角速度
     now_pitch_angle_ = K_MOTOR_ANGLE * motor_pitch_.GetNowAngle() + C_MOTOR_ANGLE;          // 角度
     now_pitch_radian_ = normalize_angle_pm_pi(now_pitch_angle_);                     // 弧度
@@ -151,11 +151,46 @@ void Gimbal::Task()
     {
         SelfResolution();
 
-        if(now_pitch_status_ == MOTOR_DM_STATUS_ENABLE) {
+        if (now_pitch_status_ == MOTOR_DM_CONTROL_STATUS_ENABLE)
+        {
             Output();
-        } else {
-            motor_pitch_.CanSendEnter();
-            osDelay(pdMS_TO_TICKS(100));
+            if (!NoConnectTimer.IsFinish()) {
+                NoConnectTimer.Finish();
+            }
+        }
+        else if(now_pitch_status_ == MOTOR_DM_CONTROL_STATUS_DISABLE)
+        {
+            NoConnectTimer.Tick([&]()
+            {
+                uint16_t step = NoConnectTimer.GetTimerCounter();
+
+                if (step == 0) {
+                    motor_pitch_.CanSendEnter();
+                }
+
+                now_pitch_status_ = motor_pitch_.GetControlStatus();
+
+                if (now_pitch_status_ == MOTOR_DM_CONTROL_STATUS_ENABLE) {
+                    NoConnectTimer.Finish();
+                }
+            });
+        } 
+        else
+        {
+            NoConnectTimer.Tick([&]()
+            {
+                uint16_t step = NoConnectTimer.GetTimerCounter();
+
+                if (step == 0) {
+                    motor_pitch_.CanSendClearError();
+                }
+
+                now_pitch_status_ = motor_pitch_.GetControlStatus();
+
+                if (now_pitch_status_ == MOTOR_DM_CONTROL_STATUS_ENABLE) {
+                    NoConnectTimer.Finish();
+                }
+            });
         }
         
         osDelay(pdMS_TO_TICKS(1));

@@ -121,6 +121,7 @@ struct McuSendAutoaimData
     uint8_t start_of_frame = 0xAC;
     uint8_t mode;
     McuConv autoaim_yaw_angle;          // 自瞄yaw轴角度
+    uint8_t first_power_on = true;
 };
 
 /**

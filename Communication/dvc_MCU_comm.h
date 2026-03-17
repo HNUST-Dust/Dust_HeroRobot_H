@@ -109,7 +109,7 @@ struct McuCommandData
         };
     } keyboard;
 
-    McuConv imu_yaw;                    // yaw轴角度
+    float imu_yaw;                    // yaw轴角度
 };
 
 /**
@@ -120,8 +120,8 @@ struct McuSendAutoaimData
 {
     uint8_t start_of_frame = 0xAC;
     uint8_t mode;
-    McuConv autoaim_yaw_angle;          // 自瞄yaw轴角度
-    uint8_t first_power_on = true;
+    float autoaim_yaw_angle;          // 自瞄yaw轴角度
+    uint8_t is_autoaim_start = 0;
 };
 
 /**
@@ -156,13 +156,14 @@ public:
         0xAB,
         0,
         0,
-        {0,0,0,0},
+        0.0f,
     };
 
     McuSendAutoaimData send_autoaim_data_ = 
     {   0xAC,
         0,
-        {0,0,0,0},
+        0.0f,
+        0,
     };
 
     McuRecvRefereeData recv_referee_data_ = 

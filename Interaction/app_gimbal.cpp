@@ -67,11 +67,11 @@ void Gimbal::Init()
     // 4340电机初始化
     motor_pitch_.Init(&hcan2, 0x04, 0x03, MOTOR_DM_CONTROL_METHOD_NORMAL_MIT, 12.5f, 10.f, 28.f);
 
-    motor_pitch_.CanSendClearError();
-    osDelay(pdMS_TO_TICKS(1000));
+    // motor_pitch_.CanSendClearError();
+    // osDelay(pdMS_TO_TICKS(1000));
 
-    motor_pitch_.CanSendEnter();
-    osDelay(pdMS_TO_TICKS(1000));
+    // motor_pitch_.CanSendEnter();
+    // osDelay(pdMS_TO_TICKS(1000));
 
     motor_pitch_.SetKp(0);      //MIT模式kp
     motor_pitch_.SetKd(0);
@@ -104,8 +104,6 @@ void Gimbal::TaskEntry(void *argument)
  */
 void Gimbal::SelfResolution()
 {
-    motor_pitch_.AlivePeriodElapsedCallback();
-
     // 获取当前数据
     now_pitch_status_ = motor_pitch_.GetControlStatus();
     now_pitch_omega_ = motor_pitch_.GetNowOmega();                                          // 角速度

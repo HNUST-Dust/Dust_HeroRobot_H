@@ -27,15 +27,16 @@
 
 /* Exported macros -----------------------------------------------------------*/
 
-#define K_PITCH                   13.f / 13200.f
-#define C_PITCH                   -832.f / 825.f
-#define MAX_PITCH_RADIAN          0.349f
-#define MIN_PITCH_RADIAN          -0.1745f
+constexpr float  K_PITCH         = 13.f / 13200.f;
+constexpr float  C_PITCH         = -832.f / 825.f;
+
+constexpr float MAX_PITCH_RADIAN =  0.349f;
+constexpr float MIN_PITCH_RADIAN = -0.1745f;
 
 /* Exported types ------------------------------------------------------------*/
 
 /**
- * @brief 云台控制类型
+ * @brief Gimbal控制类型
  *
  */
 enum GimbalControlType
@@ -44,6 +45,10 @@ enum GimbalControlType
     GIMBAL_CONTROL_TYPE_AUTOAIM,
 };
 
+/**
+ * @brief Gimbal类
+ * 
+ */
 class Gimbal
 {
 public:

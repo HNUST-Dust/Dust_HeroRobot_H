@@ -11,9 +11,6 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "dvc_remote_vt03.h"
-#include "app_gimbal.h"
-#include <algorithm>
-#include <cmath>
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -76,7 +73,7 @@ void RemoteDjiVT03::DataProcess(uint8_t* buffer)
     int16_t dy = std::clamp(raw_data_->mouse_y * 2, INT16_MIN, INT16_MAX);
     
     output_.mouse.mouse_x = (int16_t)(1683 + 1320 * ((int16_t)dx - 32767) / 65535);
-    output_.mouse.mouse_y = -(float)dy / (float)INT16_MAX;
+    output_.mouse.mouse_y += (float)dy / (float)INT16_MAX;
     output_.mouse.mouse_y = std::clamp(output_.mouse.mouse_y, MIN_PITCH_RADIAN, MAX_PITCH_RADIAN);
     // output_.mouse.mouse_z = (int16_t)raw_data_->mouse_z;
 

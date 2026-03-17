@@ -107,13 +107,9 @@ public:
 
     void Init(UART_HandleTypeDef *huart, Uart_Callback callback_function, uint16_t rx_buffer_length);
 
-    void Task();
-
     void AlivePeriodElapsedCallback();
 
     void UartRxCpltCallback(uint8_t* buffer);
-
-    static void TaskEntry(void *param);  // FreeRTOS 入口，静态函数
 
 protected:
     // 当前时刻flag
@@ -127,6 +123,10 @@ protected:
     virtual void ClearData() = 0;
 
     virtual void Process_Keyboard_Toggle(RemoteKeyboard* current_output, RemoteKeyboard current_raw);
+
+    void Task();
+
+    static void TaskEntry(void *param);  // FreeRTOS 入口，静态函数
 };
 
 

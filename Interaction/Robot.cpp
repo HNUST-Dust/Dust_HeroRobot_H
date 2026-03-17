@@ -11,23 +11,11 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "Robot.h"
-#include "cmsis_gcc.h"
-#include "cmsis_os2.h"
-#include "dvc_MCU_comm.h"
 
 /* Private macros ------------------------------------------------------------*/
 
-#define INTERVAL_LIMIT(data, max, min)      \
-    do{                                     \
-         if((data) >= (max)){               \
-            (data) = (max);                 \
-        } else if((data) <= (min)){         \
-            (data) = (min);                 \
-        }                                   \
-    }while(0)
-
-#define REMOTE_PITCH_RATIO        0.1f
-#define AUTOAIM_PITCH_RATIO       350.f
+constexpr float REMOTE_PITCH_RATIO  = 0.1f;
+constexpr float AUTOAIM_PITCH_RATIO = 350.f;
 
 /* Private types -------------------------------------------------------------*/
 
@@ -44,7 +32,7 @@ void Robot::Init()
     dwt_init(168);
 
     // 遥控初始化
-    remote_vt03_.Init(&huart1, uart1_callback_function, UART_BUFFER_LENGTH);
+    remote_vt03_.Init(&huart6, uart6_callback_function, UART_BUFFER_LENGTH);
 
     // 陀螺仪初始化
     imu_.Init();
@@ -129,7 +117,7 @@ void Robot::Task()
                 remote_radian -= filtered_autoaim / AUTOAIM_PITCH_RATIO;
             }
 
-            INTERVAL_LIMIT(remote_radian, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
+            remote_radian = std::clamp(remote_radian, MIN_PITCH_RADIAN, MAX_PITCH_RADIAN);
 
             gimbal_.SetTargetPitchRadian(remote_radian);
         }
@@ -137,7 +125,7 @@ void Robot::Task()
         {
             remote_radian = remote_vt03_.output_.remote.pitch + remote_vt03_.output_.mouse.mouse_y;
 
-            INTERVAL_LIMIT(remote_radian, MAX_PITCH_RADIAN, MIN_PITCH_RADIAN);
+            remote_radian = std::clamp(remote_radian, MIN_PITCH_RADIAN, MAX_PITCH_RADIAN);
 
             gimbal_.SetTargetPitchRadian(remote_radian);
         }

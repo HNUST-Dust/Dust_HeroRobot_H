@@ -44,9 +44,7 @@ void McuComm::Init(CAN_HandleTypeDef* hcan, uint8_t can_rx_id, uint8_t can_tx_id
      can_rx_id_ = can_rx_id;
      can_tx_id_ = can_tx_id;
 
-     send_autoaim_data_.first_power_on = true;
-
-     static const osThreadAttr_t kMcuCommTaskAttr = {
+     static const osThreadAttr_t kMcuCommTaskAttr{
           .name = "mcu_comm_task",
           .stack_size = 512,
           .priority = (osPriority_t) osPriorityNormal
@@ -97,15 +95,14 @@ void McuComm::CanSendChassisData()
 void McuComm::CanSendCommandData()
 {
      static uint8_t can_tx_frame[8];
-     McuConv yaw_conv;
-     yaw_conv.f = INS.Yaw;
-
+     float yaw = INS.Yaw;
+ 
      can_tx_frame[0] = 0xAB;
      can_tx_frame[1] = send_command_data_.mouse_lr.all;
      can_tx_frame[2] = send_command_data_.keyboard.all >> 8;
      can_tx_frame[3] = send_command_data_.keyboard.all;
 
-     memcpy(&can_tx_frame[4], yaw_conv.b, 4);
+     memcpy(&can_tx_frame[4], &yaw, 4);
 
      can_send_data(can_manage_object_->can_handler, can_tx_id_, can_tx_frame, 8);
 }
@@ -124,13 +121,8 @@ void McuComm::CanSendAutoaimData()
 
      memcpy(&can_tx_frame[2], &send_autoaim_data_.autoaim_yaw_angle, 4);
 
-     if (send_autoaim_data_.first_power_on) {
-          can_tx_frame[6] = 0x01;
-          send_autoaim_data_.first_power_on = false;
-     } else if (!send_autoaim_data_.first_power_on) {
-          can_tx_frame[6] = 0x00;
-     }
-
+     can_tx_frame[6] = send_autoaim_data_.is_autoaim_start;
+     
      can_tx_frame[7] = 0x00;
 
      can_send_data(can_manage_object_->can_handler, can_tx_id_, can_tx_frame, 8);
@@ -186,7 +178,7 @@ void McuComm::Task()
      {    
           CanSendChassisData();
           CanSendCommandData();
-          osDelay(pdMS_TO_TICKS(1));
+          osDelay(pdMS_TO_TICKS(5));
      }
 }
 

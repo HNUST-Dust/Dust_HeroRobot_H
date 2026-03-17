@@ -12,7 +12,6 @@
 
 #include "Init.h"
 #include "Robot.h"
-#include "bsp_uart.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -70,7 +69,7 @@ void can2_callback_function(CanRxBuffer* CAN_RxMessage)
             robot_.mcu_comm_.CanRxCpltCallback(CAN_RxMessage->data);
             break;
         }
-        case (0x05):
+        case (0x04):
         {
             robot_.gimbal_.motor_pitch_.CanRxCpltCallback(CAN_RxMessage->data);
             break;
@@ -84,7 +83,7 @@ void can2_callback_function(CanRxBuffer* CAN_RxMessage)
  * @param buffer 
  * @param length 
  */
-void uart1_callback_function(uint8_t* buffer, uint16_t length) 
+void uart6_callback_function(uint8_t* buffer, uint16_t length) 
 {	
 	robot_.remote_vt03_.UartRxCpltCallback(buffer);
 
@@ -139,17 +138,6 @@ void uart1_callback_function(uint8_t* buffer, uint16_t length)
 }
 
 /**
- * @brief dr16回调函数
- * 
- * @param buffer 
- * @param length 
- */
-void uart3_callback_function(uint8_t* buffer, uint16_t length) 
-{	
-	
-}
-
-/**
  * @bief USB接收完成回调函数
  *
  * @param len 接收到的数据长度
@@ -159,7 +147,7 @@ void usb_rx_callback(uint16_t len)
     robot_.pc_comm_.RxCpltCallback();
 
     robot_.mcu_comm_.send_autoaim_data_.mode = robot_.pc_comm_.recv_autoaim_data.mode;
-    robot_.mcu_comm_.send_autoaim_data_.autoaim_yaw_angle.f = robot_.pc_comm_.recv_autoaim_data.yaw.yaw_ang;
+    robot_.mcu_comm_.send_autoaim_data_.autoaim_yaw_angle = robot_.pc_comm_.recv_autoaim_data.yaw.yaw_ang;
 }
 
 /**
@@ -180,8 +168,6 @@ void Init()
 
     can_init(&hcan1, can1_callback_function);
     can_init(&hcan2, can2_callback_function);
-
-    uart_init(&huart6, nullptr, UART_BUFFER_LENGTH);
 
     robot_.Init();
 }

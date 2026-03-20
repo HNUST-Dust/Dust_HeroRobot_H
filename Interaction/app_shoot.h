@@ -8,20 +8,17 @@
  * @copyright Copyright (c) 2025
  * 
  */
-#ifndef APP_SHOOT_H_
-#define APP_SHOOT_H_
+#pragma once
 
 /* Includes ------------------------------------------------------------------*/
 
 #include "FreeRTOS.h"
-
-#include "dvc_motor_dji.h"
-
 #include "cmsis_os2.h"
+#include "dvc_motor_dji.h"
 
 /* Exported macros -----------------------------------------------------------*/
 
-constexpr float MAX_SHOOT_OMEGA = 20.0f;
+constexpr float MAX_SHOOT_OMEGA = 21.5f;
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -64,8 +61,3 @@ inline void Shoot::SetTargetShootOmega(float target_shoot_omega)
     target_shoot_omega_ = target_shoot_omega;
 }
 
-
-
-
-
-#endif

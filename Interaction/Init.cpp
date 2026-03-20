@@ -148,6 +148,7 @@ void usb_rx_callback(uint16_t len)
 
     robot_.mcu_comm_.send_autoaim_data_.mode = robot_.pc_comm_.recv_autoaim_data.mode;
     robot_.mcu_comm_.send_autoaim_data_.autoaim_yaw_angle = robot_.pc_comm_.recv_autoaim_data.yaw.yaw_ang;
+    robot_.mcu_comm_.send_autoaim_data_.is_autoaim_start = 1;
 }
 
 /**

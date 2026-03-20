@@ -92,10 +92,16 @@ void Robot::Task()
             mcu_comm_.ClearData();
         }
 
+        if (!pc_comm_.pc_alive_state) {
+            mcu_comm_.send_autoaim_data_.is_autoaim_start = 0;
+        }
+
         mcu_comm_.CanSendAutoaimData();
 
 
         /****************************   PCcomm   ****************************/
+
+        
 
         
         pc_comm_.UpdataAutoaimData(mcu_referee_data_local);
@@ -113,7 +119,7 @@ void Robot::Task()
             else 
             {
                 float filtered_autoaim =  gimbal_.pitch_autoaim_filter_.Update(pc_comm_.recv_autoaim_data.pitch.pitch_ang);
-                
+
                 remote_radian -= filtered_autoaim / AUTOAIM_PITCH_RATIO;
             }
 

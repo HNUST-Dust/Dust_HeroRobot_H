@@ -27,8 +27,8 @@
 
 /* Exported macros -----------------------------------------------------------*/
 
-constexpr float  K_PITCH         = 13.f / 13200.f;
-constexpr float  C_PITCH         = -832.f / 825.f;
+constexpr float K_PITCH          = 13.f / 13200.f;
+constexpr float C_PITCH          = -832.f / 825.f;
 
 constexpr float MAX_PITCH_RADIAN =  0.349f;
 constexpr float MIN_PITCH_RADIAN = -0.1745f;

@@ -21,8 +21,6 @@
 
 /* Exported macros -----------------------------------------------------------*/
 
-#define CLAMP(x, min, max)  ((x) > (max) ? (max) : ((x) < (min) ? (min) : (x)))
-
 /* Exported types ------------------------------------------------------------*/
 
 /**
@@ -42,7 +40,7 @@ enum RemoteKeyStatus
 enum RemoteAliveStatus
 {
     REMOTE_ALIVE_STATUS_DISABLE = 0,
-    REMOTE_ALIVE_STATUS_ENABLE  = 1,
+    REMOTE_ALIVE_STATUS_ENABLE,
 };
 
 /**

@@ -98,12 +98,7 @@ void PcComm::ClearData()
     recv_autoaim_data.mode = 0;
 
     recv_autoaim_data.yaw.yaw_ang = 0;
-    recv_autoaim_data.yaw.yaw_vel = 0;
-    recv_autoaim_data.yaw.yaw_acc = 0;
-
     recv_autoaim_data.pitch.pitch_ang = 0;
-    recv_autoaim_data.pitch.pitch_acc = 0;
-    recv_autoaim_data.pitch.pitch_vel = 0;
 }
 
 /**

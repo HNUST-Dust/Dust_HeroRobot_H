@@ -52,8 +52,8 @@ enum PcAutoAimMode
  */
 enum PcAliveState
 {
-    PC_ALIVE_STATE_ENABLE = 0,
-    PC_ALIVE_STATE_DISABLE,
+    PC_ALIVE_STATE_DISABLE = 0,
+    PC_ALIVE_STATE_ENABLE,
 };
 
 #pragma pack(1)
@@ -147,6 +147,9 @@ public:
         {0,0,0},
         0,
     };
+
+    PcAliveState pc_alive_state = PC_ALIVE_STATE_DISABLE;
+
     void Init();
 
     void Task();
@@ -163,8 +166,6 @@ private:
     uint32_t pre_flag_ = 0;
 
     uint32_t alive_count_ = 0;
-
-    PcAliveState pc_alive_state = PC_ALIVE_STATE_DISABLE;
 
     void ClearData();
 

@@ -37,8 +37,8 @@ union McuConv
  */
 enum McuAliveState
 {
-    MCU_ALIVE_STATE_ENABLE = 0,
-    MCU_ALIVE_STATE_DISABLE,
+    MCU_ALIVE_STATE_DISABLE = 0,
+    MCU_ALIVE_STATE_ENABLE,
 };
 
 /**

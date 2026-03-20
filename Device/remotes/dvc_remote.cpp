@@ -14,7 +14,7 @@
 
 /* Private macros ------------------------------------------------------------*/
 
-#define KEYBOARD_MODE   0xFFC0      // 从高到低对应 1为toggle键 0为normal键
+#define KEYBOARD_MODE   0xBFC0      // 从高到低对应 低位为w 1为toggle键 0为normal键
 
 /* Private types -------------------------------------------------------------*/
 

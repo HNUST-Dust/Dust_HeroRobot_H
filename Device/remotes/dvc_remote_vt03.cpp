@@ -56,7 +56,7 @@ void RemoteDjiVT03::DataProcess(uint8_t* buffer)
     }
 
     output_.remote.pitch = K_PITCH * raw_data_->channel_2 + C_PITCH;
-    output_.remote.pitch = CLAMP(output_.remote.pitch, MIN_PITCH_RADIAN, MAX_PITCH_RADIAN);
+    output_.remote.pitch = std::clamp(output_.remote.pitch, MIN_PITCH_RADIAN, MAX_PITCH_RADIAN);
 
     output_.remote.chassis_y = raw_data_->channel_0;
     output_.remote.chassis_x = raw_data_->channel_1;

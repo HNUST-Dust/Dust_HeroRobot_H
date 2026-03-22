@@ -175,7 +175,7 @@ void McuComm::AlivePeriodElapsedCallback()
 void McuComm::Task()
 {
      for(;;)
-     {    
+     {
           CanSendChassisData();
           CanSendCommandData();
           osDelay(pdMS_TO_TICKS(5));

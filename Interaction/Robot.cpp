@@ -102,8 +102,6 @@ void Robot::Task()
         /****************************   PCcomm   ****************************/
 
         
-
-        
         pc_comm_.UpdataAutoaimData(mcu_referee_data_local);
 
         
@@ -142,7 +140,7 @@ void Robot::Task()
         /****************************   Mode   ****************************/
 
 
-        if(remote_vt03_.output_.remote.fn2 || remote_vt03_.output_.mouse.mouse_r || remote_vt03_.output_.keyboard.f)
+        if(remote_vt03_.output_.remote.fn2 || remote_vt03_.output_.keyboard.f)
         {
             shoot_.SetTargetShootOmega(MAX_SHOOT_OMEGA);
         }

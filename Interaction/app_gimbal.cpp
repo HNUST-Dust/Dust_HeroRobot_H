@@ -16,8 +16,8 @@
 
 /* Private macros ------------------------------------------------------------*/
 
-#define K_MOTOR_ANGLE      14.4f
-#define C_MOTOR_ANGLE      42.f
+constexpr float K_MOTOR_ANGLE = 14.4f;
+constexpr float C_MOTOR_ANGLE = 42.f;
 
 /* Private types -------------------------------------------------------------*/
 
@@ -67,18 +67,12 @@ void Gimbal::Init()
     // 4340电机初始化
     motor_pitch_.Init(&hcan2, 0x04, 0x03, MOTOR_DM_CONTROL_METHOD_NORMAL_MIT, 12.5f, 10.f, 28.f);
 
-    // motor_pitch_.CanSendClearError();
-    // osDelay(pdMS_TO_TICKS(1000));
-
-    // motor_pitch_.CanSendEnter();
-    // osDelay(pdMS_TO_TICKS(1000));
-
     motor_pitch_.SetKp(0);      //MIT模式kp
     motor_pitch_.SetKd(0);
     motor_pitch_.SetControlTorque(0);
     motor_pitch_.Output();
 
-    static const osThreadAttr_t kGimbalTaskAttr = {
+    static const osThreadAttr_t kGimbalTaskAttr {
         .name = "gimbal_task",
         .stack_size = 512,
         .priority = (osPriority_t) osPriorityNormal

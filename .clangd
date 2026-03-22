@@ -9,6 +9,9 @@ CompileFlags:
     - -mfloat-abi=hard
     - -mfpu=fpv4-sp-d16
     
+    # 取消错误数量限制
+    - -ferror-limit=0
+    
     # 编译器特性
     - -fno-exceptions
     - -fno-rtti
@@ -36,3 +39,4 @@ Diagnostics:
     - unknown_typename
     - unknown_typename_suggest
     - typename_requires_specqual
+

@@ -11,6 +11,8 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "Robot.h"
+#include "Timer.hpp"
+#include <cstdio>
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -79,6 +81,8 @@ void Robot::Task()
     McuRecvRefereeData mcu_referee_data_local;
     mcu_referee_data_local.bullet_speed = 0.0f;
 
+    Timer print(10);
+
     for(;;)
     {
         /****************************   MCUcomm   ****************************/
@@ -101,8 +105,8 @@ void Robot::Task()
 
         /****************************   PCcomm   ****************************/
 
-        
-        pc_comm_.UpdataAutoaimData(mcu_referee_data_local);
+
+        pc_comm_.UpdataAutoaimData(mcu_referee_data_local, 0, 0);
 
         
         /****************************   Gimbal   ****************************/

@@ -54,7 +54,7 @@ void PcComm::TaskEntry(void *argument)
  * @brief PcComm更新自瞄数据函数
  * 
  */
-void PcComm::UpdataAutoaimData(McuRecvRefereeData& referee_data)
+void PcComm::UpdataAutoaimData(McuRecvRefereeData& referee_data, float pitch_offset, float yaw_offset)
 {
     float rotation_q[4] = {0};
 
@@ -63,9 +63,9 @@ void PcComm::UpdataAutoaimData(McuRecvRefereeData& referee_data)
     memcpy(&send_autoaim_data.q, rotation_q, 16);
 
     send_autoaim_data.mode           = 0;
-    send_autoaim_data.yaw.ang        = INS.Yaw;
+    send_autoaim_data.yaw.ang        = INS.Yaw + yaw_offset;
     send_autoaim_data.yaw.vel        = INS.Gyro[Z];
-    send_autoaim_data.pitch.ang      = -INS.Roll;
+    send_autoaim_data.pitch.ang      = -INS.Roll - pitch_offset;
     send_autoaim_data.pitch.vel      = -INS.Gyro[X]; 
     send_autoaim_data.bullet.speed   = referee_data.bullet_speed;
     send_autoaim_data.bullet.count   = 20;

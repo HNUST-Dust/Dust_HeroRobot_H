@@ -18,7 +18,7 @@
 
 /* Exported macros -----------------------------------------------------------*/
 
-constexpr float MAX_SHOOT_OMEGA = 21.5f;
+constexpr float MAX_SHOOT_OMEGA = 19.5f;
 
 /* Exported types ------------------------------------------------------------*/
 

@@ -158,7 +158,7 @@ public:
 
     void RxCpltCallback();
 
-    void UpdataAutoaimData(McuRecvRefereeData& referee_data);
+    void UpdataAutoaimData(McuRecvRefereeData& referee_data, float pitch_offset, float yaw_offset);
 
 private:
     uint32_t flag_ = 0;
